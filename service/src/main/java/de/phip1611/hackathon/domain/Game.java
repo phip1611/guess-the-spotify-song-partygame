@@ -1,6 +1,7 @@
 package de.phip1611.hackathon.domain;
 
 import de.phip1611.hackathon.api.input.NewGameInput;
+import de.phip1611.hackathon.api.input.PlayerPointsInput;
 
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
@@ -76,10 +77,12 @@ public class Game {
         return songs;
     }
 
+    /**
+     * Returns the current game round or the last game round
+     * if the game is finished.
+     */
     public GameRound getCurrentGameRound() {
-        if (this.finished) {
-            throw new IllegalStateException("Game already finished!");
-        } else if (this.gameRounds.isEmpty()) {
+        if (this.gameRounds.isEmpty()) {
             return null;
         }
         return this.gameRounds.get(this.gameRounds.size() - 1);
@@ -89,11 +92,17 @@ public class Game {
         if (!this.isStarted()) {
             this.started = true;
         }
+        if (this.gameRounds.size() == this.rounds) {
+            throw new IllegalStateException("Maximum rounds count already reached!");
+        }
+        if (!this.gameRounds.isEmpty() && !this.getCurrentGameRound().isFinished()) {
+            throw new IllegalStateException("Can't start next game round; current one is not finished!!");
+        }
         this.gameRounds.add(new GameRound(songId));
     }
 
-    public void finishCurrentRound() {
-        this.getCurrentGameRound().finish();
+    public void finishCurrentRound(List<PlayerPointsInput> playerPointsInputs) {
+        this.getCurrentGameRound().finish(playerPointsInputs);
         if (this.gameRounds.size() == this.rounds) {
             this.finished = true;
         }

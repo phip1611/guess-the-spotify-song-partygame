@@ -1,5 +1,6 @@
 package de.phip1611.hackathon.domain;
 
+import de.phip1611.hackathon.api.input.PlayerPointsInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,8 @@ public class GameRound {
 
     /**
      * Whether user feedback is allowed. Usually after
-     * the song has started playing.
+     * the song has started playing. Can be understood as
+     * "is started".
      */
     private boolean enableUserFeedback;
 
@@ -37,7 +39,6 @@ public class GameRound {
      * If this game round is done.
      */
     private boolean finished;
-
 
     private LocalDateTime startedTime;
 
@@ -69,14 +70,10 @@ public class GameRound {
         this.enableUserFeedback = true;
     }
 
-    public void finish() {
-        if (this.finished) {
-            throw new IllegalStateException("Already finished!");
-        }
-        this.finished = true;
-    }
-
     public void addPlayerFeedback(String playerId) {
+        if (!this.enableUserFeedback) {
+            return;
+        }
         var playerIdsAlreadyGivenFeedback = this.playerFeedbacks.stream()
                 .map(PlayerFeedback::getPlayerId)
                 .collect(toList());
@@ -85,6 +82,14 @@ public class GameRound {
         } else {
             this.playerFeedbacks.add(new PlayerFeedback(playerId, this.startedTime));
         }
+    }
+
+    public void finish(List<PlayerPointsInput> playerPointsInputs) {
+        if (this.finished) {
+            throw new IllegalStateException("Finished current round already!");
+        }
+        this.playerPoints.addAll(playerPointsInputs.stream().map(PlayerPoints::new).collect(toList()));
+        this.finished = true;
     }
 
     public UUID getId() {

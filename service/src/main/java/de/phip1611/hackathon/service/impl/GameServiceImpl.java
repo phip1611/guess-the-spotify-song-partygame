@@ -87,7 +87,7 @@ public class GameServiceImpl implements GameService {
             throw new IllegalArgumentException("No game found");
         }
         var entity = opt.get();
-        entity.finishCurrentRound();
+        entity.finishCurrentRound(playerPointsInputs);
     }
 
     @Override
