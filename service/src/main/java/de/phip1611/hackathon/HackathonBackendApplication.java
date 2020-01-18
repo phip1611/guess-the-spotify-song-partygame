@@ -1,4 +1,4 @@
-package de.phip1611.hackathon.hackathonbackend;
+package de.phip1611.hackathon;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
