@@ -18,10 +18,7 @@ import { InGameComponent } from './components/in-game.component';
     imports: [
         AppCommonModule
     ],
-    providers: [],
-    exports: [
-        InGameComponent
-    ]
+    providers: []
 })
 export class GameMasterModule {
 }
