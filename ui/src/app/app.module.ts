@@ -8,6 +8,10 @@ import { PlayerModule } from './player/player.module';
 import { GameMasterModule } from './gamemaster/game-master.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.interceptor';
+import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
+
+const socketIoConfig: SocketIoConfig = { url: 'http://localhost:8080', options: {} };
+
 
 @NgModule({
   declarations: [
@@ -16,6 +20,7 @@ import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.inte
   imports: [
     AppRoutingModule,
     BrowserAnimationsModule,
+    SocketIoModule.forRoot(socketIoConfig),
 
     AppCommonModule,
     PlayerModule,
