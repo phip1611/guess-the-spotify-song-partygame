@@ -12,6 +12,7 @@ import { CommonGameService } from '../common/common-game.service';
     <app-start-new-game *ngIf="gameMasterState === 'CREATE_GAME'"
     ></app-start-new-game>
     <app-show-link *ngIf="gameMasterState === 'INVITE_LINK'"
+                   (gameStarted)="onGameStarted()"
     ></app-show-link>
     <app-in-game *ngIf="gameMasterState === 'IN_GAME'"
     ></app-in-game>
@@ -58,6 +59,9 @@ export class GameMasterComponent implements OnInit, OnDestroy {
     if (this.subscription) { this.subscription.unsubscribe(); }
   }
 
+  onGameStarted() {
+    this.gameMasterState = GameMasterState.IN_GAME;
+  }
 }
 
 export enum GameMasterState {

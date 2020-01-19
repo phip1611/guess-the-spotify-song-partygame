@@ -20,6 +20,8 @@ export class SpotifyApiService {
 
   private static readonly SPOTIFY_URL_PLAYLIST_TRACKS = 'https://api.spotify.com/v1/playlists/{playlist_id}/tracks';
 
+  private static readonly SPOTIFY_URL_TRACK_INFO = 'https://api.spotify.com/v1/tracks/{track_id}';
+
   private authToken: string;
 
   constructor(private http: HttpClient) {
@@ -86,6 +88,11 @@ export class SpotifyApiService {
         // all the items in the list
         map(x => x.items)
       );
+  }
+
+  getSingleSongData(songId: string): Observable<any> {
+    const url = SpotifyApiService.SPOTIFY_URL_TRACK_INFO.replace('{track_id}', songId);
+    return this.http.get<any>(url);
   }
 
 }
