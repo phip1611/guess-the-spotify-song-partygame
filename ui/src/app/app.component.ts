@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ClientGameStateService } from './common/game.service';
+import { ClientGameStateService } from './common/client-state.service';
 import { Log, LogLevel } from 'ng-log';
 
 @Component({
@@ -32,13 +32,18 @@ import { Log, LogLevel } from 'ng-log';
 })
 export class AppComponent implements OnInit {
 
+  private static readonly LOGGER = new Log( AppComponent.name );
+
   constructor(private clientGameStateService: ClientGameStateService) {
   }
 
   ngOnInit(): void {
+    // must stand before any log
+    Log.$logEntry.subscribe(e => console.log(LogLevel[e.level] + ': ' + e.message));
+
+    AppComponent.LOGGER.debug('Called initOnBootstrap');
     this.clientGameStateService.initOnBootstrap();
 
-    Log.$logEntry.subscribe(e => console.log(LogLevel[e.level] + ': ' + e.message));
   }
 
 }

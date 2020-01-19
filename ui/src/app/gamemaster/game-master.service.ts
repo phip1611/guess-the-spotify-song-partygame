@@ -3,10 +3,10 @@ import { GameMasterModule } from './game-master.module';
 import { HttpClient } from '@angular/common/http';
 import { NewGameInput } from '../common/model/new-game-input';
 import { Observable, Subscription } from 'rxjs';
-import { ClientGameStateService } from '../common/game.service';
+import { ClientGameStateService } from '../common/client-state.service';
 
 @Injectable({
-  providedIn: GameMasterModule
+  providedIn: 'root'
 })
 export class GameMasterService {
 
@@ -14,7 +14,7 @@ export class GameMasterService {
   }
 
   startNewGame(input: NewGameInput): Observable<string> {
-    return this.httpClient.post<string>('game', input);
+    return this.httpClient.post<string>('http://localhost:8080/game', input);
   }
 
 }

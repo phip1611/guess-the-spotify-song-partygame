@@ -28,7 +28,7 @@ public class GameController {
     }
 
     @PostMapping("game")
-    public UUID startNewGame(NewGameInput input) {
+    public UUID startNewGame(@RequestBody NewGameInput input) {
         return this.gameService.newGame(input);
     }
 

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { PlayerComponent } from './player/player.component';
 import { GameMasterComponent } from './gamemaster/game-master.component';
+import { SpotifyRedirectComponent } from './gamemaster/spotify-redirect.component';
 
 
 const routes: Routes = [
@@ -12,6 +13,10 @@ const routes: Routes = [
   {
     path: '',
     component: GameMasterComponent
+  },
+  {
+    path: 'spotify-redirect',
+    component: SpotifyRedirectComponent
   },
   {
     path: '**', component: GameMasterComponent

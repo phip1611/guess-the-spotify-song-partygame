@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatChipsModule } from '@angular/material/chips';
 
 const MAT_MODULES = [
   MatButtonModule,
@@ -17,7 +18,8 @@ const MAT_MODULES = [
   MatToolbarModule,
   MatCardModule,
   MatFormFieldModule,
-  MatInputModule
+  MatInputModule,
+  MatChipsModule
 ];
 
 const IMP_EXPORT_MODULES = [
