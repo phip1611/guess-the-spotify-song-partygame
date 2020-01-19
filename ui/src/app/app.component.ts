@@ -23,7 +23,7 @@ import { Log, LogLevel } from 'ng-log';
     <div class="container">
       <div class="row">
         <div class="col-md-8 offset-md-2">
-          <router-outlet></router-outlet>
+          <app-gm-in-game></app-gm-in-game>
         </div>
       </div>
     </div>

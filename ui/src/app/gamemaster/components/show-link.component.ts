@@ -5,6 +5,7 @@ import { GameMasterService } from '../game-master.service';
 import { switchMap } from 'rxjs/operators';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
+import { SocketEventType } from '../../common/model/socket-events';
 
 @Component({
   selector: 'app-gm-show-link',
@@ -49,6 +50,12 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    // when this component is shown its because the game was just created
+    this.socketService.sendMessage({
+      payload: null,
+      type: SocketEventType.GM_CREATE_GAME
+    });
+
     this.subscription = this.socketService.getPlayerRegistered().subscribe(playerId => {
       ShowLinkComponent.LOGGER.debug('Got signal from socket service that a players want to register');
       this.gameMasterService.addPlayer(playerId);

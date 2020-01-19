@@ -34,18 +34,10 @@ export class GameMasterComponent implements OnInit, OnDestroy {
   onNewGameCreated() {
     // this.state += 1;
     this.state = GameMasterState.INVITE_LINK;
-    this.socketService.sendMessage({
-      payload: null,
-      type: SocketEventType.GM_CREATE_GAME
-    });
   }
 
   onGameStarted() {
     this.state = GameMasterState.IN_GAME;
-    this.socketService.sendMessage({
-      type: SocketEventType.GM_START_NEXT_ROUND,
-      payload: null
-    });
   }
 }
 

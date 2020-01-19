@@ -9,9 +9,9 @@ export class GameMasterService {
 
   private static readonly LOGGER = new Log(GameMasterService.name);
 
-  private songsAvailable: any[];
+  private songsAvailable: any[] = [];
 
-  private songsPlayed: any[];
+  private songsPlayed: any[] = [];
 
   private roundsCount = 0;
 
@@ -52,10 +52,24 @@ export class GameMasterService {
     return this.songsPlayed;
   }
 
+  getRandomSongAndMarkAsPlayed(): any {
+    const index = this.getRandomSongIndex();
+    const song = this.songsAvailable[index];
+    this.songsAvailable.splice(index, 1);
+    this.songsPlayed.push(song);
+    console.dir('next song is: ');
+    console.dir(song);
+    return song;
+  }
+
   markSongAsPlayed(songId: string): void {
     this.songsPlayed.push(
       this.songsAvailable.filter(x => x.id === songId)[0]
     );
+  }
+
+  private getRandomSongIndex(): number {
+    return Math.floor(Math.random() * this.songsAvailable.length);
   }
 
 }

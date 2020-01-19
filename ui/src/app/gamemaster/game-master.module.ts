@@ -8,17 +8,20 @@ import { InGameComponent } from './components/in-game.component';
 
 
 @NgModule({
-  declarations: [
-    GameMasterComponent,
-    CreateNewGameComponent,
-    SpotifyRedirectComponent,
-    ShowLinkComponent,
-    InGameComponent,
-  ],
-  imports: [
-    AppCommonModule
-  ],
-  providers: [],
+    declarations: [
+        GameMasterComponent,
+        CreateNewGameComponent,
+        SpotifyRedirectComponent,
+        ShowLinkComponent,
+        InGameComponent,
+    ],
+    imports: [
+        AppCommonModule
+    ],
+    providers: [],
+    exports: [
+        InGameComponent
+    ]
 })
 export class GameMasterModule {
 }
