@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { PlayerComponent } from './player/player.component';
 import { GameMasterComponent } from './gamemaster/game-master.component';
 import { SpotifyRedirectComponent } from './gamemaster/spotify-redirect.component';
@@ -7,7 +7,7 @@ import { SpotifyRedirectComponent } from './gamemaster/spotify-redirect.componen
 
 const routes: Routes = [
   {
-    path: 'game/:id',
+    path: 'game',
     component: PlayerComponent
   },
   {

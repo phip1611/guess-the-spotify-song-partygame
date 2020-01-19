@@ -7,7 +7,11 @@ export enum SocketEventType {
   GM_CREATE_GAME = 'GM_CREATE_GAME',
   GM_ENABLE_BUZZER = 'GM_ENABLE_BUZZER',
   GM_START_NEXT_ROUND = 'GM_START_NEXT_ROUND',
-  PLAYER_REGISTER = 'HELLO',
+  // when a client enters the session
+  PLAYER_HELLO = 'PLAYER_HELLO',
+  // when a client submitted its user name
+  PLAYER_REGISTER = 'PLAYER_REGISTER',
+  // when a client hit the buzzer button
   PLAYER_BUZZER = 'PLAYER_BUZZER',
 }
 
@@ -31,10 +35,15 @@ export type PlayerRegisterPayload = string;
 /**
  * Notify game master a player hit the button.
  */
-export type PlayerBuzzerPayload = void;
+export type PlayerBuzzerPayload = string;
+/**
+ * Notify game master a player hit the button.
+ */
+export type PlayerHelloPayload = void;
 
 export type SocketPayload = GmCreateGamePayload |
   GmEnableBuzzerPayload |
   GmStartNextRoundPayload |
   PlayerRegisterPayload |
+  PlayerHelloPayload |
   PlayerBuzzerPayload;

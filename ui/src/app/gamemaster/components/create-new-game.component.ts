@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { ClientGameStateService, ClientRole } from '../../common/client-state.service';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
 import { SpotifyApiService } from '../../common/spotify-api.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-start-new-game',
+  selector: 'app-gm-create-new-game',
   template: `
     <ng-container *ngIf="!spotifyService.isConnected()">
       <button mat-raised-button color="primary" (click)="onConnect()"
@@ -21,7 +21,7 @@ import { GameMasterService } from '../game-master.service';
         <div class="row">
           <div class="col-4 col-lg-6">
             <mat-form-field class="w-100" color="primary">
-              <input matInput type="number" placeholder="Anzahl Runden" formControlName="rounds">
+              <input matInput type="number" placeholder="Anzahl Runden" value="10" formControlName="rounds">
             </mat-form-field>
           </div>
           <div class="col-8 col-lg-4 offset-lg-2 mt-3">
@@ -36,14 +36,16 @@ import { GameMasterService } from '../game-master.service';
 
   `
 })
-export class StartNewGameComponent implements OnInit {
+export class CreateNewGameComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(StartNewGameComponent.name);
+  private static readonly LOGGER = new Log(CreateNewGameComponent.name);
 
   form: FormGroup;
 
+  @Output()
+  done = new EventEmitter();
+
   constructor(private spotifyService: SpotifyApiService,
-              private clientGameStateService: ClientGameStateService,
               private gameMasterService: GameMasterService,
               private fb: FormBuilder) {
   }
@@ -60,17 +62,13 @@ export class StartNewGameComponent implements OnInit {
   }
 
   startGame() {
-    const {spotifyPlaylist, rounds} = this.form.getRawValue();
-    this.spotifyService.getPlaylistData(spotifyPlaylist).subscribe(data => {
-      const songIds = [];
-      data.forEach(entry => {
-        const track = entry.track;
-        songIds.push(track.id);
-      });
-      this.gameMasterService.startNewGame({rounds: rounds, songIds: songIds}).subscribe((gameId) => {
-        StartNewGameComponent.LOGGER.debug('Started game, id is: ' + gameId);
-        this.clientGameStateService.updateClientState({gameId: gameId, role: ClientRole.GAME_MASTER, playerId: null});
-      });
+    const rounds = this.form.get('rounds').value;
+    this.spotifyService.getPlaylistData(this.form.get('spotifyPlaylist').value).subscribe(songs => {
+      this.gameMasterService.createGame(songs, rounds);
+      this.done.next();
+    }, (err: HttpErrorResponse) => {
+      CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
+      CreateNewGameComponent.LOGGER.error(err.message);
     });
   }
 }

@@ -1,6 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ClientGameStateService, ClientRole } from '../common/client-state.service';
-import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Log } from 'ng-log';
 import { SpotifyApiService } from '../common/spotify-api.service';

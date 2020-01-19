@@ -1,31 +1,61 @@
-import { Injectable, OnDestroy, OnInit } from '@angular/core';
-import { GameMasterModule } from './game-master.module';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NewGameInput } from '../common/model/new-game-input';
-import { Observable, Subscription } from 'rxjs';
-import { ClientGameStateService } from '../common/client-state.service';
-import { map } from 'rxjs/operators';
+import { Log } from 'ng-log';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameMasterService {
 
+  private static readonly LOGGER = new Log(GameMasterService.name);
+
+  private songsAvailable: any[];
+
+  private songsPlayed: any[];
+
+  private roundsCount = 0;
+
+  private players: string[] = [];
+
   constructor(private httpClient: HttpClient) {
   }
 
-  startNewGame(input: NewGameInput): Observable<string> {
-    return this.httpClient.post<string>('http://localhost:8080/game', input);
+  createGame(songs: any[], rounds: number) {
+    this.songsAvailable = songs;
+    this.roundsCount = rounds;
   }
 
-  getNextSongId(gameId: string): Observable<string> {
-    return this.httpClient.get(`http://localhost:8080/game/${gameId}/nextsong/`, {
-      responseType: 'text'
-    });
+  destroyGame(songs: any[], rounds: number) {
+    this.songsAvailable = [];
+    this.players = [];
+    this.roundsCount = 0;
   }
 
-  startNextRound(gameId: string, songId: string): Observable<void> {
-    return this.httpClient.post<void>(`http://localhost:8080/game/${gameId}/startnextgameround/`, songId);
+  addPlayer(playerName: string): void {
+    if (!this.players.includes(playerName)) {
+      GameMasterService.LOGGER.debug(`Player ${playerName} joined the game`);
+      this.players.push(playerName);
+    } else {
+      GameMasterService.LOGGER.error(`Player ${playerName} already registered!`);
+    }
+  }
+
+  getPlayers(): string[] {
+    return this.players;
+  }
+
+  getSongsAvailable(): any[] {
+    return this.songsAvailable;
+  }
+
+  getSongsPlayed(): any[] {
+    return this.songsPlayed;
+  }
+
+  markSongAsPlayed(songId: string): void {
+    this.songsPlayed.push(
+      this.songsAvailable.filter(x => x.id === songId)[0]
+    );
   }
 
 }

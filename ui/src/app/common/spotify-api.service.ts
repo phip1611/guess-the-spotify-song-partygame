@@ -2,9 +2,7 @@ import { Injectable } from '@angular/core';
 import { Log } from 'ng-log';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { SpotifyPlaylistTrack } from './model/spotify-playlist-track';
-import { flatten } from '@angular/compiler';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -82,12 +80,12 @@ export class SpotifyApiService {
 
     const url = SpotifyApiService.SPOTIFY_URL_PLAYLIST_TRACKS.replace('{playlist_id}', id);
     SpotifyApiService.LOGGER.debug('Request to spotify playlist api url: "' + url + '"');
+
     // todo check for pageable and not just take first 100
-    return this.http.get<any>(url)
-      .pipe(
-        // all the items in the list
-        map(x => x.items)
-      );
+    return this.http.get<any>(url).pipe(
+      map(x => x.items),
+      map(items => items.map(i => i.track)),
+    );
   }
 
   getSingleSongData(songId: string): Observable<any> {

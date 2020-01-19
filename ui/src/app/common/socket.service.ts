@@ -7,7 +7,9 @@ import {
   GmCreateGamePayload,
   GmEnableBuzzerPayload,
   GmStartNextRoundPayload,
-  PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent,
+  PlayerBuzzerPayload,
+  PlayerRegisterPayload,
+  SocketEvent,
   SocketEventType
 } from './model/socket-events';
 
@@ -47,7 +49,7 @@ export class SocketService {
   getBuzzerEnabled(): Observable<GmEnableBuzzerPayload> {
     return this.socket
       .fromEvent(SocketEventType.GM_ENABLE_BUZZER)
-      .pipe(map(x => x as PlayerBuzzerPayload));
+      .pipe(map(x => x as GmEnableBuzzerPayload));
   }
 
   getNextRoundStarted(): Observable<GmStartNextRoundPayload> {
