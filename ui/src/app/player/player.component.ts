@@ -8,8 +8,10 @@ import { take } from 'rxjs/operators';
   selector: 'app-player',
   template: `
     <app-player-waiting-for-game *ngIf="state === 0"
+                      (done)="onGameCreated()"
     ></app-player-waiting-for-game>
     <app-player-join-game *ngIf="state === 1"
+                          (done)="onGameStarts()"
     ></app-player-join-game>
     <app-player-in-game *ngIf="state === 2"
     ></app-player-in-game>
@@ -30,19 +32,19 @@ export class PlayerComponent implements OnInit, OnDestroy {
       payload: null,
       type: SocketEventType.PLAYER_HELLO
     });
-
-    // wait if there is already a started game
-    this.socketService.getGameCreated().pipe(take(1)).subscribe(() => {
-      PlayerComponent.LOGGER.debug('created game session; now open dialog to join');
-      this.state = PlayerState.JOIN_GAME;
-    });
-
   }
 
   ngOnDestroy(): void {
   }
 
 
+  onGameCreated() {
+    this.state = PlayerState.JOIN_GAME;
+  }
+
+  onGameStarts() {
+    this.state = PlayerState.IN_GAME;
+  }
 }
 
 

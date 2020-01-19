@@ -51,4 +51,22 @@ io.on('connect', (socket) => {
             gameMasterSocket.emit(SocketEventType.PLAYER_REGISTER, data);
         }
     });
+
+    socket.on(SocketEventType.GM_START_NEXT_ROUND, () => {
+        // received from game master
+        console.log('notify all clients that next game round has started');
+        playerSockets.forEach(s => s.emit(SocketEventType.GM_START_NEXT_ROUND));
+    });
+
+    socket.on(SocketEventType.GM_ENABLE_BUZZER, () => {
+        // received from game master
+        console.log('notify all clients that buzzers are enabled');
+        playerSockets.forEach(s => s.emit(SocketEventType.GM_ENABLE_BUZZER));
+    });
+
+    // a player hits the buzzer, let the game master now it
+    socket.on(SocketEventType.PLAYER_BUZZER, (playerName) => {
+        console.log(`Player ${playerName} hit the buzzer; let the game master know`);
+        gameMasterSocket.emit(SocketEventType.PLAYER_BUZZER, playerName);
+    });
 });

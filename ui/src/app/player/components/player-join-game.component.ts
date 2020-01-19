@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { SocketEventType } from '../../common/model/socket-events';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-player-join-game',
@@ -23,6 +24,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         </div>
       </form>
     </mat-card>
+
     <mat-card *ngIf="joined">
       <h3 class="mt-3 text-center">{{playerName}} - Bitte warte, bis der Gamemaster das Spiel startet :)</h3>
 
@@ -46,6 +48,9 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
   playerName: string;
 
+  @Output()
+  done = new EventEmitter();
+
   constructor(private socketService: SocketService,
               private fb: FormBuilder) {
   }
@@ -66,6 +71,11 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
       type: SocketEventType.PLAYER_REGISTER
     });
     this.joined = true;
+
+    // wait until game round started
+    this.socketService.getNextRoundStarted().pipe(take(1)).subscribe(
+      () => this.done.next()
+    );
   }
 
 }

@@ -10,6 +10,7 @@ import { SocketEventType } from '../common/model/socket-events';
                        (done)="onNewGameCreated()"
     ></app-gm-create-new-game>
     <app-gm-show-link *ngIf="state === 1"
+                      (done)="onGameStarted()"
     ></app-gm-show-link>
     <app-gm-in-game *ngIf="state === 2"
     ></app-gm-in-game>
@@ -31,10 +32,19 @@ export class GameMasterComponent implements OnInit, OnDestroy {
   }
 
   onNewGameCreated() {
-    this.state += 1;
+    // this.state += 1;
+    this.state = GameMasterState.INVITE_LINK;
     this.socketService.sendMessage({
       payload: null,
       type: SocketEventType.GM_CREATE_GAME
+    });
+  }
+
+  onGameStarted() {
+    this.state = GameMasterState.IN_GAME;
+    this.socketService.sendMessage({
+      type: SocketEventType.GM_START_NEXT_ROUND,
+      payload: null
     });
   }
 }

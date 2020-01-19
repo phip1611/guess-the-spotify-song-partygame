@@ -1,6 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
+import { take } from 'rxjs/operators';
+import { PlayerState } from '../player.component';
 
 @Component({
   selector: 'app-player-waiting-for-game',
@@ -20,13 +22,20 @@ import { SocketService } from '../../common/socket.service';
 })
 export class PlayerWaitingForGameComponent implements OnInit, OnDestroy {
 
-  private static readonly LOGGER = new Log(PlayerWaitingForGameComponent.name);
-
   constructor(private socketService: SocketService) {
   }
 
-  ngOnInit(): void {
+  private static readonly LOGGER = new Log(PlayerWaitingForGameComponent.name);
 
+  @Output()
+  done = new EventEmitter();
+
+  ngOnInit(): void {
+    // wait if there is already a started game or until a game has been started
+    this.socketService.getGameCreated().pipe(take(1)).subscribe(() => {
+      PlayerWaitingForGameComponent.LOGGER.debug('created game session; now open dialog to join');
+      this.done.next();
+    });
   }
 
   ngOnDestroy(): void {

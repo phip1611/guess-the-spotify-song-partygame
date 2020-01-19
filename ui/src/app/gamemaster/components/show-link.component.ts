@@ -40,6 +40,9 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
 
   public player: string[] = [];
 
+  @Output()
+  done = new EventEmitter();
+
   constructor(private gameMasterService: GameMasterService,
               private socketService: SocketService) {
   }
@@ -54,7 +57,7 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   }
 
   startGame(): void {
-
+    this.done.next();
   }
 
   ngOnDestroy(): void {
