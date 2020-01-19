@@ -7,7 +7,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-player-join-game',
   template: `
-    <mat-card>
+    <mat-card *ngIf="!joined">
       <form class="w-100" *ngIf="form" [formGroup]="form">
         <mat-form-field class="w-100">
           <input matInput placeholder="Benutzername" formControlName="playerName">
@@ -23,6 +23,17 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         </div>
       </form>
     </mat-card>
+    <mat-card *ngIf="joined">
+      <h3 class="mt-3 text-center">{{playerName}} - Bitte warte, bis der Gamemaster das Spiel startet :)</h3>
+
+      <div class="d-flex justify-content-center mt-3">
+        <div class="lds-facebook">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </mat-card>
   `
 })
 export class PlayerJoinGameComponent implements OnInit, OnDestroy {
@@ -30,6 +41,10 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   private static readonly LOGGER = new Log(PlayerJoinGameComponent.name);
 
   form: FormGroup;
+
+  joined = false;
+
+  playerName: string;
 
   constructor(private socketService: SocketService,
               private fb: FormBuilder) {
@@ -45,10 +60,12 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   }
 
   doJoinGame(): void {
+    this.playerName = this.form.getRawValue().playerName;
     this.socketService.sendMessage({
-      payload: this.form.getRawValue().playerName,
+      payload: this.playerName,
       type: SocketEventType.PLAYER_REGISTER
     });
+    this.joined = true;
   }
 
 }

@@ -25,10 +25,6 @@ export class GameMasterComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.socketService.sendMessage({
-      payload: null,
-      type: SocketEventType.GM_CREATE_GAME
-    });
   }
 
   ngOnDestroy(): void {

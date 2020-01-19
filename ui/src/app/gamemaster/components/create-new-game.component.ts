@@ -9,8 +9,15 @@ import { HttpErrorResponse } from '@angular/common/http';
   selector: 'app-gm-create-new-game',
   template: `
     <ng-container *ngIf="!spotifyService.isConnected()">
-      <button mat-raised-button color="primary" (click)="onConnect()"
-      ><mat-icon>music_note</mat-icon> Bei Spotify einloggen</button>
+      <mat-card>
+        <div class="d-flex justify-content-center">
+          <button mat-raised-button color="primary" (click)="onConnect()"
+          >
+            <mat-icon>music_note</mat-icon>
+            Bei Spotify einloggen
+          </button>
+        </div>
+      </mat-card>
     </ng-container>
     <mat-card *ngIf="spotifyService.isConnected()">
       <form class="w-100" *ngIf="form" [formGroup]="form">
@@ -19,18 +26,25 @@ import { HttpErrorResponse } from '@angular/common/http';
         </mat-form-field>
 
         <div class="row">
-          <div class="col-4 col-lg-6">
-            <mat-form-field class="w-100" color="primary">
-              <input matInput type="number" placeholder="Anzahl Runden" value="10" formControlName="rounds">
-            </mat-form-field>
-          </div>
-          <div class="col-8 col-lg-4 offset-lg-2 mt-3">
-            <button
-              [disabled]="!form.valid"
-              class="w-100" mat-raised-button color="primary" (click)="startGame()">Neues Spiel starten</button>
+          <div class="col-5 col-md-3 mt-2">Anzahl Runden:</div>
+          <div class="col-1 mt-2">{{form?.getRawValue().rounds}}</div>
+          <div class="col-6 col-md-8 ">
+            <mat-slider thumbLabel
+                        tickInterval="1"
+                        [min]="1"
+                        [max]="100"
+                        class="w-100"
+                        formControlName="rounds"
+            ></mat-slider>
           </div>
         </div>
-
+        <div class="row">
+          <div class="col-12 col-sm-6 offset-sm-6 col-md-6 offset-md-6 col-lg-4 offset-lg-8 col-xl-3 offset-xl-9">
+            <button [disabled]="!form.valid"
+              class="w-100" mat-raised-button color="primary" (click)="startGame()">Neues Spiel starten
+            </button>
+          </div>
+        </div>
       </form>
     </mat-card>
 
@@ -53,7 +67,7 @@ export class CreateNewGameComponent implements OnInit {
   ngOnInit(): void {
     this.form = this.fb.group({
       spotifyPlaylist: ['', Validators.required],
-      rounds: [1, [Validators.required, Validators.min(1)]],
+      rounds: [10, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -69,6 +83,9 @@ export class CreateNewGameComponent implements OnInit {
     }, (err: HttpErrorResponse) => {
       CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
       CreateNewGameComponent.LOGGER.error(err.message);
+      if (err.status === 401) {
+        this.spotifyService.openAuthWebsite();
+      }
     });
   }
 }
