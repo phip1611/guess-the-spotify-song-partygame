@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
-import { SocketEventType, SocketService } from '../common/socket.service';
+import { SocketService } from '../common/socket.service';
 import { PlayerService } from './player.service';
+import { SocketEventType } from '../common/model/socket-events';
 
 @Component({
   selector: 'app-player',
@@ -19,7 +20,8 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.socketService.sendMessage({
-      payload: this.playerService.generateName(), type: SocketEventType.PLAYER_REGISTER
+      payload: this.playerService.generateName(),
+      type: SocketEventType.PLAYER_REGISTER
     });
   }
 

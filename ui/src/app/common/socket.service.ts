@@ -3,6 +3,13 @@ import { Socket } from 'ngx-socket-io';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Log } from 'ng-log';
+import {
+  GmCreateGamePayload,
+  GmEnableBuzzerPayload,
+  GmStartNextRoundPayload,
+  PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent,
+  SocketEventType
+} from './model/socket-events';
 
 @Injectable({
   providedIn: 'root'
@@ -19,45 +26,34 @@ export class SocketService {
     this.socket.emit(event.type, event.payload);
   }
 
-  getPlayerRegistered(): Observable<UserNamePayload> {
+  getGameCreated(): Observable<GmCreateGamePayload> {
+    return this.socket
+      .fromEvent(SocketEventType.GM_CREATE_GAME)
+      .pipe(map(x => x as GmCreateGamePayload));
+  }
+
+  getPlayerRegistered(): Observable<PlayerRegisterPayload> {
     return this.socket
       .fromEvent(SocketEventType.PLAYER_REGISTER)
-      .pipe(map(x => x as UserNamePayload));
+      .pipe(map(x => x as PlayerRegisterPayload));
   }
 
-  getPlayerBuzzered(): Observable<BuzzerHitPayload> {
+  getPlayerBuzzered(): Observable<PlayerBuzzerPayload> {
     return this.socket
       .fromEvent(SocketEventType.PLAYER_BUZZER)
-      .pipe(map(x => x as BuzzerHitPayload));
+      .pipe(map(x => x as PlayerBuzzerPayload));
   }
 
-  getBuzzerEnabled(): Observable<BuzzerHitPayload> {
+  getBuzzerEnabled(): Observable<GmEnableBuzzerPayload> {
     return this.socket
       .fromEvent(SocketEventType.GM_ENABLE_BUZZER)
-      .pipe(map(x => x as BuzzerHitPayload));
+      .pipe(map(x => x as PlayerBuzzerPayload));
   }
 
-  getNextRoundStarted(): Observable<NextRoundPayload> {
+  getNextRoundStarted(): Observable<GmStartNextRoundPayload> {
     return this.socket
-      .fromEvent(SocketEventType.GM_NEXT_ROUND_START)
-      .pipe(map(x => x as NextRoundPayload));
+      .fromEvent(SocketEventType.GM_START_NEXT_ROUND)
+      .pipe(map(x => x as GmStartNextRoundPayload));
   }
 
 }
-
-export interface SocketEvent {
-  type: SocketEventType;
-  payload: UserNamePayload | BuzzerHitPayload | EnabledBuzzerPayload | NextRoundPayload;
-}
-
-export enum SocketEventType {
-  PLAYER_REGISTER = 'PLAYER_REGISTER',
-  PLAYER_BUZZER = 'PLAYER_BUZZER',
-  GM_ENABLE_BUZZER = 'GM_ENABLE_BUZZER',
-  GM_NEXT_ROUND_START = 'GM_NEXT_ROUND_START'
-}
-
-export type UserNamePayload = string;
-export type BuzzerHitPayload = void;
-export type EnabledBuzzerPayload = void;
-export type NextRoundPayload = void;
