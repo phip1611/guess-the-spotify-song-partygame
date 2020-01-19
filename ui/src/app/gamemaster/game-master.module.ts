@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { AppCommonModule } from '../common/app-common.module';
 import { GameMasterComponent } from './game-master.component';
-import { StartNewGameComponent } from './start-new-game.component';
+import { StartNewGameComponent } from './components/start-new-game.component';
 import { SpotifyRedirectComponent } from './spotify-redirect.component';
-import { ShowLinkComponent } from './show-link.component';
-import { InGameComponent } from './in-game.component';
+import { ShowLinkComponent } from './components/show-link.component';
+import { InGameComponent } from './components/in-game.component';
 
 
 @NgModule({

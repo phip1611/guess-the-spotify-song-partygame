@@ -1,11 +1,11 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { ClientGameStateService, ClientRole } from '../common/client-state.service';
+import { ClientGameStateService, ClientRole } from '../../common/client-state.service';
 import { Log } from 'ng-log';
-import { SpotifyApiService } from '../common/spotify-api.service';
+import { SpotifyApiService } from '../../common/spotify-api.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GameMasterService } from './game-master.service';
-import { CommonGameService } from '../common/common-game.service';
-import { PublicGameStatusDto } from '../common/model/public-game-status-dto';
+import { GameMasterService } from '../game-master.service';
+import { CommonGameService } from '../../common/common-game.service';
+import { PublicGameStatusDto } from '../../common/model/public-game-status-dto';
 import { switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
