@@ -4,6 +4,7 @@ import { SocketService } from '../../common/socket.service';
 import { SocketEventType } from '../../common/model/socket-events';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
+import { PlayerService } from '../game-master.service';
 
 @Component({
   selector: 'app-player-join-game',
@@ -15,7 +16,7 @@ import { take } from 'rxjs/operators';
         </mat-form-field>
 
         <div class="row">
-          <div class="col-4 offset-8 col-lg-6 offset-lg-6">
+          <div class="col-6 offset-6 col-lg-4 offset-lg-8">
             <button
               [disabled]="!form.valid"
               class="w-100" mat-raised-button color="primary" (click)="doJoinGame()">Spiel beitreten
@@ -52,7 +53,8 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   done = new EventEmitter();
 
   constructor(private socketService: SocketService,
-              private fb: FormBuilder) {
+              private fb: FormBuilder,
+              private playerService: PlayerService) {
   }
 
   ngOnInit(): void {
@@ -66,6 +68,7 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
   doJoinGame(): void {
     this.playerName = this.form.getRawValue().playerName;
+    this.playerService.setPlayerName(this.playerName);
     this.socketService.sendMessage({
       payload: this.playerName,
       type: SocketEventType.PLAYER_REGISTER

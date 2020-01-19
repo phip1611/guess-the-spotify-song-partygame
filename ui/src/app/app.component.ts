@@ -3,7 +3,7 @@ import { Log, LogLevel } from 'ng-log';
 
 @Component({
   selector: 'app-root',
-  template: `    
+  template: `
     <mat-toolbar color="primary" class="mb-3">
       <h1 class="text-center w-100">🎶 Songs erraten - Der Partyspaß 🥳</h1>
     </mat-toolbar>

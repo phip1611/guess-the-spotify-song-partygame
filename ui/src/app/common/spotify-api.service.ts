@@ -85,6 +85,7 @@ export class SpotifyApiService {
     return this.http.get<any>(url).pipe(
       map(x => x.items),
       map(items => items.map(i => i.track)),
+      map(items => items.filter(i => !!i.preview_url)),
     );
   }
 

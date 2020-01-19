@@ -8,7 +8,7 @@ import { take } from 'rxjs/operators';
   selector: 'app-player',
   template: `
     <app-player-waiting-for-game *ngIf="state === 0"
-                      (done)="onGameCreated()"
+                                 (done)="onGameCreated()"
     ></app-player-waiting-for-game>
     <app-player-join-game *ngIf="state === 1"
                           (done)="onGameStarts()"

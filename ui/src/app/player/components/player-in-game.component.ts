@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
+import { PlayerService } from '../game-master.service';
+import { SocketEventType } from '../../common/model/socket-events';
 
 @Component({
   selector: 'app-player-in-game',
@@ -9,6 +11,7 @@ import { Subscription } from 'rxjs';
     <mat-card>
       <button mat-raised-button color="warn" class="w-100" style="height: 400px; font-size: 30px"
               [disabled]="!buzzerEnabled"
+              (click)="onBuzzered()"
       >Buzzer</button>
     </mat-card>
   `
@@ -22,7 +25,8 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
   private subs1: Subscription;
   private subs2: Subscription;
 
-  constructor(private socketService: SocketService) {
+  constructor(private socketService: SocketService,
+              private playerService: PlayerService) {
   }
 
   ngOnInit(): void {
@@ -40,4 +44,11 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
   }
 
 
+  onBuzzered() {
+    this.socketService.sendMessage({
+      payload: this.playerService.getPlayerName(),
+      type: SocketEventType.PLAYER_BUZZER
+    });
+    this.buzzerEnabled = false;
+  }
 }

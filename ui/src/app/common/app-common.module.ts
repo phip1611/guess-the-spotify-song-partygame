@@ -11,6 +11,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
 
 const MAT_MODULES = [
   MatButtonModule,
@@ -22,6 +24,8 @@ const MAT_MODULES = [
   MatInputModule,
   MatChipsModule,
   MatSliderModule,
+  MatDividerModule,
+  MatListModule,
 ];
 
 const IMP_EXPORT_MODULES = [
