@@ -29,7 +29,7 @@ import { HttpErrorResponse } from '@angular/common/http';
           <form *ngIf="form" [formGroup]="form">
             <mat-form-field class="w-100">
               <input matInput placeholder="Spotify-Playlist" formControlName="spotifyPlaylist">
-              <mat-hint align="start">ID, Spotify-Link (spotify:playlist:%id%) oder HTTPS-link</mat-hint>
+              <mat-hint align="start">ID, Spotify-Link (spotify:playlist:) oder HTTPS</mat-hint>
             </mat-form-field>
           </form>
         </div>

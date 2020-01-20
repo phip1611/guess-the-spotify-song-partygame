@@ -10,20 +10,23 @@ import { PlayerService } from '../game-master.service';
   selector: 'app-player-join-game',
   template: `
     <mat-card *ngIf="!joined">
-      <form class="w-100" *ngIf="form" [formGroup]="form">
-        <mat-form-field class="w-100">
-          <input matInput placeholder="Benutzername" formControlName="playerName">
-        </mat-form-field>
-
+      <form *ngIf="form" [formGroup]="form">
         <div class="row">
-          <div class="col-6 offset-6 col-lg-4 offset-lg-8">
+          <div class="col-12 col-md-8">
+            <mat-form-field class="w-100">
+              <input matInput placeholder="Benutzername" formControlName="playerName">
+            </mat-form-field>
+          </div>
+          <div class="col-12 mt-0 mt-md-2 col-md-4">
             <button
               [disabled]="!form.valid"
-              class="w-100" mat-raised-button color="primary" (click)="doJoinGame()">Spiel beitreten
+              class="w-100" mat-raised-button color="primary"
+              (click)="doJoinGame()">Spiel beitreten
             </button>
           </div>
         </div>
       </form>
+
     </mat-card>
 
     <mat-card *ngIf="joined">

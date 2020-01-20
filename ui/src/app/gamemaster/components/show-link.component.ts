@@ -14,8 +14,7 @@ import { JOIN_GAME_URL } from '../../common/config/urls';
     <mat-card>
       <p>Teile diesen Link mit deinen Freunden, damit sie dem Spiel beitreten können:</p>
       <mat-chip-list>
-        <mat-chip
-          color="primary" selected>
+        <mat-chip color="warn" selected>
           {{joinGameUrl}}
         </mat-chip>
       </mat-chip-list>
@@ -27,9 +26,11 @@ import { JOIN_GAME_URL } from '../../common/config/urls';
             {{ player }}
           </mat-chip>
         </mat-chip-list>
-        <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
-                *ngIf="player.length >= 2">Spiel starten
-        </button>
+        <div class="d-flex justify-content-end">
+          <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
+                  *ngIf="player.length >= 2">Spiel starten
+          </button>
+        </div>
       </ng-container>
     </mat-card>
   `

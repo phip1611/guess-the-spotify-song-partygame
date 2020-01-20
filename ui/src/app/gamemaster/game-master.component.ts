@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
-import { SocketEventType } from '../common/model/socket-events';
 
 @Component({
   selector: 'app-game-master',
