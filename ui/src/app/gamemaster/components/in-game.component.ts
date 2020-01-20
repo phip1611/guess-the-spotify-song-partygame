@@ -3,6 +3,7 @@ import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { SocketEventType } from '../../common/model/socket-events';
 import { Subscription } from 'rxjs';
+import { Log } from 'ng-log';
 
 @Component({
   selector: 'app-gm-in-game',
@@ -11,21 +12,25 @@ import { Subscription } from 'rxjs';
       <div class="row">
         <div class="col">
           <button class="w-100"
-                  [disabled]="!songPlayedOnce"
-                  mat-raised-button color="accent" (click)="showSolution = !showSolution; solutionShowedOnce = true">
+                  [disabled]="!playback?.playedOnce"
+                  mat-raised-button color="accent"
+                  (click)="showSolution = !showSolution; solutionShowedOnce = true">
             Lösung
           </button>
         </div>
         <div class="col">
           <button class="w-100"
-                  [disabled]="!playSongButtonEnabled" mat-raised-button color="warn" (click)="onSongPlayed()">Song
+                  [disabled]="playback?.isPlaying"
+                  mat-raised-button color="warn"
+                  (click)="onPlaySong()">Song
             abspielen
           </button>
         </div>
         <div class="col">
           <button class="w-100"
-                  [disabled]="!songPlayedOnce || !solutionShowedOnce"
-                  mat-raised-button color="primary" (click)="onNextRound()">Nächste Runde
+                  [disabled]="!playback?.playedOnce || !solutionShowedOnce"
+                  mat-raised-button color="primary"
+                  (click)="onNextRound()">Nächste Runde
           </button>
         </div>
       </div>
@@ -36,11 +41,12 @@ import { Subscription } from 'rxjs';
         <div class="col-10 offset-1 col-sm-8 offset-sm-2 col-md-6 offset-md-3">
           <mat-card>
             <mat-card-header>
-              <mat-card-title>{{currentSong.name}}</mat-card-title>
-              <mat-card-subtitle>{{getArtistsStringFromCurrentSong()}}
-                - {{currentSong.album.name}}</mat-card-subtitle>
+              <mat-card-title>{{playback.getSongTitle()}}</mat-card-title>
+              <mat-card-subtitle>
+                {{playback.getArtistsString()}}
+                - {{playback.getAlbumName()}}</mat-card-subtitle>
             </mat-card-header>
-            <img mat-card-image [src]="currentSong?.album?.images[0]?.url">
+            <img mat-card-image [src]="playback.getImageUrl()" alt="Album image">
           </mat-card>
         </div>
       </div>
@@ -61,21 +67,17 @@ import { Subscription } from 'rxjs';
 })
 export class InGameComponent implements OnInit {
 
+  isVeryFirstRound: boolean = true;
+
+  playback: Playback;
+
   showSolution: boolean;
-
-  currentSong: any;
-
-  playSongButtonEnabled = true;
-
-  songPlayedOnce = false;
 
   solutionShowedOnce = false;
 
   playerBuzzerSubscription: Subscription;
 
-  songPlayedStartTime: Date = null;
-
-  buzzerTimeByPlayerName: {playerName: string, seconds: number}[] = [];
+  buzzerTimeByPlayerName: { playerName: string, seconds: number }[] = [];
 
   constructor(private gameMasterService: GameMasterService,
               private socketService: SocketService) {
@@ -86,22 +88,15 @@ export class InGameComponent implements OnInit {
     this.onNextRound();
   }
 
-  onSongPlayed(): void {
-    this.songPlayedOnce = true;
-    if (!this.songPlayedStartTime) {
-      this.songPlayedStartTime = new Date();
-    }
-    this.playSongButtonEnabled = false;
+  onPlaySong(): void {
     this.socketService.sendMessage({
       type: SocketEventType.GM_ENABLE_BUZZER,
       payload: null
     });
-    const audio = new Audio(this.currentSong.preview_url);
-    audio.play();
-    audio.addEventListener('ended', () => this.playSongButtonEnabled = true);
+    this.playback.play();
 
     this.socketService.getPlayerBuzzered().subscribe(playerId => {
-      const millis = new Date().getTime() - this.songPlayedStartTime.getTime();
+      const millis = new Date().getTime() - this.playback.firstPlayedTime.getTime();
       const seconds = millis / 1000;
       this.buzzerTimeByPlayerName.push({
         seconds: seconds, playerName: playerId
@@ -110,30 +105,106 @@ export class InGameComponent implements OnInit {
   }
 
   onNextRound() {
-    // todo mechanism that stops playback of song if desired
-    this.playSongButtonEnabled = true;
-    this.songPlayedOnce = false;
-    this.solutionShowedOnce = false;
+    this.showSolution = false;
 
-    if (this.playerBuzzerSubscription) {
-      this.playerBuzzerSubscription.unsubscribe();
-    }
-    this.buzzerTimeByPlayerName = [];
-    this.songPlayedStartTime = null;
-
-    this.currentSong = this.gameMasterService.getRandomSongAndMarkAsPlayed();
+    // disable all buzzer buttons
     this.socketService.sendMessage({
       type: SocketEventType.GM_START_NEXT_ROUND,
       payload: null
     });
+
+    if (!this.isVeryFirstRound) {
+      this.playback.stop(); // stop old playback if it's running
+      // reset everything
+      this.solutionShowedOnce = false;
+      if (this.playerBuzzerSubscription) {
+        // not sure why this can be undefined here..
+        this.playerBuzzerSubscription.unsubscribe();
+      }
+      this.buzzerTimeByPlayerName = [];
+    } else {
+      this.isVeryFirstRound = false;
+    }
+
+    // prepare audio playback
+    const nextSong = this.gameMasterService.getRandomSongAndMarkAsPlayed();
+    this.playback = new Playback(nextSong);
   }
 
-  private getArtistsStringFromCurrentSong(): string {
-    const val = this.currentSong.artists.map(x => x.name).reduce((a, b) => a + ', ' + b) as string;
-    if (val.includes(', ')) {
-      return val.substr(0, val.length - 2);
-    } else {
-      return val;
+}
+
+/**
+ * Represents a playback during a single game round for one song.
+ */
+class Playback {
+
+  private static readonly LOGGER = new Log(Playback.name);
+
+  private readonly _spotifyTrack: any;
+
+  private _playedOnce: boolean = false;
+
+  private audio: HTMLAudioElement;
+
+  private _isPlaying: boolean = false;
+
+  private _firstPlayedTime: Date;
+
+  constructor(spotifyTrack: any) {
+    this._spotifyTrack = spotifyTrack;
+    this.audio = new Audio(spotifyTrack.preview_url);
+    this.audio.addEventListener('ended', () => this.stop());
+  }
+
+  public play(): void {
+    if (this._isPlaying) {
+      Playback.LOGGER.debug('music is already playing!');
+      return;
     }
+    if (!this._firstPlayedTime) {
+      this._firstPlayedTime = new Date();
+    }
+    this._playedOnce = true;
+    this._isPlaying = true;
+    this.audio.play();
+  }
+
+  public stop(): void {
+    this._isPlaying = false;
+    this.audio.pause();
+    this.audio.currentTime = 0; // reset for another playback
+  }
+
+  get playedOnce(): boolean {
+    return this._playedOnce;
+  }
+
+  get isPlaying(): boolean {
+    return this._isPlaying;
+  }
+
+  get spotifyTrack(): any {
+    return this._spotifyTrack;
+  }
+
+  get firstPlayedTime(): Date {
+    return this._firstPlayedTime;
+  }
+
+  getSongTitle(): string {
+    return this._spotifyTrack.name;
+  }
+
+  getAlbumName(): string {
+    return this._spotifyTrack.album.name;
+  }
+
+  getArtistsString(): string {
+    const names = this._spotifyTrack.artists.map(x => x.name) as string[];
+    return names.reduce((a, b) => a + ', ' + b);
+  }
+
+  getImageUrl(): string {
+    return this._spotifyTrack.album?.images[0]?.url
   }
 }

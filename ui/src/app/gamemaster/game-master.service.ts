@@ -57,8 +57,8 @@ export class GameMasterService {
     const song = this.songsAvailable[index];
     this.songsAvailable.splice(index, 1);
     this.songsPlayed.push(song);
-    console.dir('next song is: ');
-    console.dir(song);
+    // console.dir('next song is: ');
+    // console.dir(song);
     return song;
   }
 
