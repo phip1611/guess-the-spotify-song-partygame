@@ -8,7 +8,7 @@ import { GameMasterModule } from './gamemaster/game-master.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.interceptor';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
-import { SOCKET_URL } from './common/interceptor/urls';
+import { SOCKET_URL } from './common/config/urls';
 
 const socketIoConfig: SocketIoConfig = { url: SOCKET_URL, options: {} };
 

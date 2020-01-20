@@ -3,7 +3,7 @@ import { Log } from 'ng-log';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SPOTIFY_REDIRECT_URL } from './interceptor/urls';
+import { SPOTIFY_REDIRECT_URL } from './config/urls';
 
 @Injectable({
   providedIn: 'root'
@@ -59,15 +59,9 @@ export class SpotifyApiService {
   }
 
   getPlaylistData(playlistId: string): Observable<any[]> {
-    let id = playlistId.trim();
-    if (id.startsWith('http://')) {
-      id = id.split('spotify.com/playlist/')[1];
-      if (id.includes('?si=')) {
-        id = id.split('?si=')[0];
-      }
-    } else {
-      id = id.replace('spotify:playlist:', '');
-    }
+    // at this point we assume its valid because we have a validator
+    // in the form
+    const id = SpotifyApiService.parseIdString(playlistId);
 
     const url = SpotifyApiService.SPOTIFY_URL_PLAYLIST_TRACKS.replace('{playlist_id}', id);
     SpotifyApiService.LOGGER.debug('Request to spotify playlist api url: "' + url + '"');
@@ -83,6 +77,27 @@ export class SpotifyApiService {
   getSingleSongData(songId: string): Observable<any> {
     const url = SpotifyApiService.SPOTIFY_URL_TRACK_INFO.replace('{track_id}', songId);
     return this.http.get<any>(url);
+  }
+
+  /**
+   * Parses HTTPS://-Spotify-Links, "spotify:playlist:%id%"-Links and gives the ID back if found.
+   * There is NO validation in here!
+   *
+   * @param idString
+   */
+  static parseIdString(idString: string): string | null {
+    idString = idString.trim();
+    if (idString.startsWith('spotify:playlist:')) {
+      return idString.split('spotify:playlist:')[1];
+    } else if (idString.startsWith('https://')) {
+      let id = idString.split('spotify.com/playlist/')[1];
+      if (id.includes('?')) {
+        id = id.split('?')[0];
+      }
+      return id;
+    } else {
+      return idString;
+    }
   }
 
 }

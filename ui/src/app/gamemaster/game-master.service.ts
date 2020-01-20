@@ -13,22 +13,18 @@ export class GameMasterService {
 
   private songsPlayed: any[] = [];
 
-  private roundsCount = 0;
-
   private players: string[] = [];
 
   constructor(private httpClient: HttpClient) {
   }
 
-  createGame(songs: any[], rounds: number) {
+  createGame(songs: any[]) {
     this.songsAvailable = songs;
-    this.roundsCount = rounds;
   }
 
   destroyGame(songs: any[], rounds: number) {
     this.songsAvailable = [];
     this.players = [];
-    this.roundsCount = 0;
   }
 
   addPlayer(playerName: string): void {

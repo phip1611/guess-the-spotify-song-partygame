@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { SocketEventType } from '../../common/model/socket-events';
-import { JOIN_GAME_URL } from '../../common/interceptor/urls';
+import { JOIN_GAME_URL } from '../../common/config/urls';
 
 @Component({
   selector: 'app-gm-show-link',
