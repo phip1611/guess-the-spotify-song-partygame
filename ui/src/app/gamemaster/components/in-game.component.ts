@@ -121,7 +121,7 @@ export class InGameComponent implements OnInit {
     });
     this.playback.play();
 
-    this.socketService.getPlayerBuzzered().subscribe(playerId => {
+    this.playerBuzzerSubscription = this.socketService.getPlayerBuzzered().subscribe(playerId => {
       const millis = new Date().getTime() - this.playback.firstPlayedTime.getTime();
       const seconds = millis / 1000;
       this.buzzerTimeByPlayerName.push({
@@ -143,10 +143,8 @@ export class InGameComponent implements OnInit {
       this.playback.stop(); // stop old playback if it's running
       // reset everything
       this.solutionShowedOnce = false;
-      if (this.playerBuzzerSubscription) {
-        // not sure why this can be undefined here..
-        this.playerBuzzerSubscription.unsubscribe();
-      }
+      // not sure why this can be undefined here..
+      this.playerBuzzerSubscription.unsubscribe();
       this.buzzerTimeByPlayerName = [];
     } else {
       this.isVeryFirstRound = false;
