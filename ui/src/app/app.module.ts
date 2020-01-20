@@ -9,7 +9,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.interceptor';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 
-const socketIoConfig: SocketIoConfig = { url: 'http://192.168.1.102:8080', options: {} };
+// todo find solution for this; not just localhost...
+const socketIoConfig: SocketIoConfig = { url: 'http://localhost:8080', options: {} };
 
 
 @NgModule({

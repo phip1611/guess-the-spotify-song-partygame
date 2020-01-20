@@ -11,4 +11,6 @@ make their guess and the game master decides if its correct.
 
 The game master gives points to the team in his web ui.
 
-
+It's recommended to use a big screen 
+where the moderator can show the solutions, which players
+has the most points and so on :)
