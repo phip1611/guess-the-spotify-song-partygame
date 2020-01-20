@@ -8,10 +8,9 @@ import { GameMasterModule } from './gamemaster/game-master.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.interceptor';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
+import { SOCKET_URL } from './common/interceptor/urls';
 
-// todo find solution for this; not just localhost...
-const socketIoConfig: SocketIoConfig = { url: 'http://localhost:8080', options: {} };
-
+const socketIoConfig: SocketIoConfig = { url: SOCKET_URL, options: {} };
 
 @NgModule({
   declarations: [

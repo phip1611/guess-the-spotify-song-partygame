@@ -3,6 +3,7 @@ import { Log } from 'ng-log';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SPOTIFY_REDIRECT_URL } from './interceptor/urls';
 
 @Injectable({
   providedIn: 'root'
@@ -27,25 +28,11 @@ export class SpotifyApiService {
   }
 
   openAuthWebsite(): void {
-    /*if (this.connected) {
-      SpotifyApiService.LOGGER.debug('ALREADY CONNECTED!');
-      return;
-    }
-    const params: SpotifyAuthPayload = {
-      client_id: SpotifyApiService.CLIENT_ID,
-      response_type: 'token',
-      redirect_uri: 'http://localhost:4200/spotify-redirect',
-      state: 'foobar',
-      scope: 'string'
-    };
-    return this.http.get<string>(SpotifyApiService.SPOTIFY_URI_LOGIN, {
-      params: new HttpParams({fromObject: params as any})
-    });*/
     const paramsO: SpotifyAuthPayload = {
       client_id: SpotifyApiService.CLIENT_ID,
       response_type: 'token',
-      redirect_uri: 'http://localhost:4200/spotify-redirect',
-      state: 'foobar',
+      redirect_uri: SPOTIFY_REDIRECT_URL,
+      state: '',
       scope: ''
     };
     const params = new HttpParams({fromObject: paramsO as any});
@@ -55,7 +42,11 @@ export class SpotifyApiService {
 
   setAuthToken(authToken: string) {
     SpotifyApiService.LOGGER.debug('Auth token set!');
-    localStorage.setItem('SPOTIFY_AUTH_TOKEN', authToken);
+    if (authToken){
+      localStorage.setItem('SPOTIFY_AUTH_TOKEN', authToken);
+    } else {
+      localStorage.removeItem('SPOTIFY_AUTH_TOKEN');
+    }
     this.authToken = authToken;
   }
 

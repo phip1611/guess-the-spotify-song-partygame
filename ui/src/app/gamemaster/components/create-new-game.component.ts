@@ -84,6 +84,7 @@ export class CreateNewGameComponent implements OnInit {
       CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
       CreateNewGameComponent.LOGGER.error(err.message);
       if (err.status === 401) {
+        this.spotifyService.setAuthToken(null);
         this.spotifyService.openAuthWebsite();
       }
     });

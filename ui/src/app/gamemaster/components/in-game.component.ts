@@ -47,7 +47,7 @@ import { Subscription } from 'rxjs';
     </ng-container>
 
     <div *ngIf="buzzerTimeByPlayerName.length">
-      <mat-card>
+      <mat-card class="mt-3">
         <mat-list>
           <ng-container *ngFor="let e of buzzerTimeByPlayerName; let i = index">
             <mat-list-item>{{e.playerName}} - {{e.seconds}}s</mat-list-item>

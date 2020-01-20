@@ -6,6 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { SocketEventType } from '../../common/model/socket-events';
+import { JOIN_GAME_URL } from '../../common/interceptor/urls';
 
 @Component({
   selector: 'app-gm-show-link',
@@ -15,7 +16,7 @@ import { SocketEventType } from '../../common/model/socket-events';
       <mat-chip-list>
         <mat-chip
           color="primary" selected>
-          http://localhost:4200/game
+          {{joinGameUrl}}
         </mat-chip>
       </mat-chip-list>
 
@@ -40,6 +41,8 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   public player: string[] = [];
+
+  public joinGameUrl: string = JOIN_GAME_URL;
 
   @Output()
   done = new EventEmitter();
