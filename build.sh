@@ -21,4 +21,6 @@ cp server-node/package.json server-node/build/yarn.lock
 cd server-node
 yarn run tsc
 
+cd ..
+
 docker build -t phip1611:guess-spotify-song-game .
