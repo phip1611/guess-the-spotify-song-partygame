@@ -1,12 +1,23 @@
 import { Server as SocketIoServer, Socket } from 'socket.io';
+import { dirname, join } from 'path';
+import * as express from 'express';
 import { SocketEventType } from './socket-events';
 
-// INIT
+const ROOT_DIR = dirname(require.main.filename);
+const ANGULAR_DIR = join(ROOT_DIR, 'public');
+
+const expressApp = express();
+const httpServer = require('http').createServer(expressApp);
 const socketIo = require('socket.io');
-const port = 8080;
-const httpServer = require('http').createServer();
+
+expressApp.use(express.static(ANGULAR_DIR));
+// ---- SERVE APPLICATION PATHS ---- //
+expressApp.all('*', (req, res) => {
+    res.status(200).sendFile(`/`, {root: ANGULAR_DIR});
+});
+
 const io: SocketIoServer = socketIo(httpServer);
-httpServer.listen(port);
+httpServer.listen(8080);
 
 let playersCanJoin = true;
 let gameMasterSocket: Socket;

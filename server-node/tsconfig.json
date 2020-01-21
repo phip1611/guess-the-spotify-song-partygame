@@ -12,7 +12,8 @@
     "importHelpers": true,
     "types": [
       "node",
-      "socket.io"
+      "socket.io",
+      "express"
     ],
     "typeRoots": [
       "node_modules/@types"

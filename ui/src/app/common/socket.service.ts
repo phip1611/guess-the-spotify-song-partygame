@@ -3,15 +3,10 @@ import { Socket } from 'ngx-socket-io';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Log } from 'ng-log';
-import {
-  GmCreateGamePayload,
-  GmEnableBuzzerPayload,
-  GmStartNextRoundPayload,
-  PlayerBuzzerPayload,
-  PlayerRegisterPayload,
-  SocketEvent,
-  SocketEventType
-} from './model/socket-events';
+// tslint:disable-next-line:max-line-length
+import { GmCreateGamePayload, GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from './model/socket-events';
+import { SOCKET_URL } from './config/urls';
+import { SocketProvider } from './socket.provider';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +15,7 @@ export class SocketService {
 
   private static readonly LOGGER = new Log(SocketService.name);
 
-  constructor(private socket: Socket) {
+  constructor(private socket: SocketProvider) {
   }
 
   sendMessage(event: SocketEvent) {

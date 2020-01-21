@@ -14,3 +14,7 @@ The game master gives points to the team in his web ui.
 It's recommended to use a big screen 
 where the moderator can show the solutions, which players
 has the most points and so on :)
+
+## Build + Run
+$ sh build.sh
+$ docker run -p 8080:8080 phip1611:guess-spotify-song-game
