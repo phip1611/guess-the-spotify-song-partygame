@@ -5,6 +5,8 @@ import { SocketEventType } from '../../common/model/socket-events';
 import { Subscription } from 'rxjs';
 import { Log } from 'ng-log';
 
+export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
+
 @Component({
   selector: 'app-gm-in-game',
   template: `
@@ -33,56 +35,44 @@ import { Log } from 'ng-log';
             <button class="w-100"
                     [disabled]="!playback?.playedOnce || !solutionShowedOnce"
                     mat-raised-button color="primary"
-                    (click)="onNextRound()">Nächste Runde
+                    (click)="onNextRound()">
+              Nächste Runde
             </button>
           </div>
         </div>
       </mat-card>
 
-      <ng-container *ngIf="showSolution">
-        <div class="row mt-3">
-          <div class="col-10 offset-1 col-sm-8 offset-sm-2 col-md-6 offset-md-3">
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>{{playback.getSongTitle()}}</mat-card-title>
-                <mat-card-subtitle>
-                  {{playback.getArtistsString()}}
-                  - {{playback.getAlbumName()}}</mat-card-subtitle>
-              </mat-card-header>
-              <img mat-card-image [src]="playback.getImageUrl()" alt="Album image">
-            </mat-card>
+      <!-- solution and player buzzer times on same row -->
+      <div class="row mt-3">
+        <ng-container *ngIf="!showSolution && !buzzerTimeByPlayerName.length">
+          <div class="col-12 offset-0 col-lg-8 offset-lg-2">
+            <app-player-points></app-player-points>
           </div>
-        </div>
-      </ng-container>
+        </ng-container>
 
-      <div *ngIf="buzzerTimeByPlayerName.length">
-        <mat-card class="mt-3">
-          <mat-list>
-            <ng-container *ngFor="let e of buzzerTimeByPlayerName; let i = index">
-              <mat-list-item>{{e.playerName}} - {{e.seconds}}s</mat-list-item>
-              <mat-divider *ngIf="i < buzzerTimeByPlayerName.length - 1"></mat-divider>
-            </ng-container>
-          </mat-list>
-        </mat-card>
+        <ng-container *ngIf="showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length">
+          <div class="col-12 offset-0 col-lg-8 offset-lg-2">
+            <app-spotify-songcard *ngIf="showSolution" [playback]="playback"></app-spotify-songcard>
+            <app-player-buzzer-times *ngIf="buzzerTimeByPlayerName.length"
+                                     [times]="buzzerTimeByPlayerName"
+            ></app-player-buzzer-times>
+            <app-player-points class="mt-3"></app-player-points>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="showSolution && buzzerTimeByPlayerName.length">
+          <div class="col-12 mb-3 col-lg-6 mb-lg-0">
+            <app-spotify-songcard
+              [playback]="playback"
+            ></app-spotify-songcard>
+          </div>
+          <div class="col-12 col-lg-6">
+            <app-player-buzzer-times [times]="buzzerTimeByPlayerName"></app-player-buzzer-times>
+            <app-player-points class="mt-3"></app-player-points>
+          </div>
+        </ng-container>
       </div>
-
-      <mat-card class="mt-3">
-        <mat-list>
-          <ng-container *ngFor="let player of pointsPerPlayer; let i = index">
-            <mat-list-item>
-              <mat-chip class="mr-3">{{player.points}}</mat-chip>
-              <span class="d-inline-block mr-3">{{player.playerName}}</span>
-              <mat-chip class="mr-1" (click)="addPoint(i)">
-                <mat-icon>add</mat-icon>
-              </mat-chip>
-              <mat-chip (click)="removePoint(i)">
-                <mat-icon>remove</mat-icon>
-              </mat-chip>
-            </mat-list-item>
-            <mat-divider *ngIf="i < pointsPerPlayer.length - 1"></mat-divider>
-          </ng-container>
-        </mat-list>
-      </mat-card>
+      
     </div>
   `
 })
@@ -98,9 +88,7 @@ export class InGameComponent implements OnInit {
 
   playerBuzzerSubscription: Subscription;
 
-  buzzerTimeByPlayerName: { playerName: string, seconds: number }[] = [];
-
-  pointsPerPlayer: { playerName: string; points: number }[] = [];
+  buzzerTimeByPlayerName: PlayerBuzzerTimesType = [];
 
   constructor(private gameMasterService: GameMasterService,
               private socketService: SocketService) {
@@ -109,9 +97,6 @@ export class InGameComponent implements OnInit {
   ngOnInit(): void {
     // when this component is shown it shall start the first game round
     this.onNextRound();
-    this.gameMasterService.getPlayers().forEach(pl => {
-      this.pointsPerPlayer.push({ playerName: pl, points: 0 });
-    });
   }
 
   onPlaySong(): void {
@@ -124,9 +109,13 @@ export class InGameComponent implements OnInit {
     this.playerBuzzerSubscription = this.socketService.getPlayerBuzzered().subscribe(playerId => {
       const millis = new Date().getTime() - this.playback.firstPlayedTime.getTime();
       const seconds = millis / 1000;
-      this.buzzerTimeByPlayerName.push({
+      const tmpArr = this.buzzerTimeByPlayerName;
+      this.buzzerTimeByPlayerName = [];
+      tmpArr.push({
         seconds: seconds, playerName: playerId
       });
+      // do trigger angular change detection
+      this.buzzerTimeByPlayerName = tmpArr;
     });
   }
 
@@ -143,7 +132,6 @@ export class InGameComponent implements OnInit {
       this.playback.stop(); // stop old playback if it's running
       // reset everything
       this.solutionShowedOnce = false;
-      // not sure why this can be undefined here..
       this.playerBuzzerSubscription.unsubscribe();
       this.buzzerTimeByPlayerName = [];
     } else {
@@ -154,20 +142,12 @@ export class InGameComponent implements OnInit {
     const nextSong = this.gameMasterService.getRandomSongAndMarkAsPlayed();
     this.playback = new Playback(nextSong);
   }
-
-  addPoint(index: number): void {
-    this.pointsPerPlayer[index].points++;
-  }
-
-  removePoint(index: number): void {
-    this.pointsPerPlayer[index].points--;
-  }
 }
 
 /**
  * Represents a playback during a single game round for one song.
  */
-class Playback {
+export class Playback {
 
   private static readonly LOGGER = new Log(Playback.name);
 
@@ -236,6 +216,6 @@ class Playback {
   }
 
   getImageUrl(): string {
-    return this._spotifyTrack.album?.images[0]?.url
+    return this._spotifyTrack.album?.images[0]?.url;
   }
 }

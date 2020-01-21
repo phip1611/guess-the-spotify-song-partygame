@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Log } from 'ng-log';
 
+export type PointsPerPlayerType = { playerName: string; points: number }[];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -15,7 +17,9 @@ export class GameMasterService {
 
   private players: string[] = [];
 
-  constructor(private httpClient: HttpClient) {
+  private pointsPerPlayer: PointsPerPlayerType = [];
+
+  constructor() {
   }
 
   createGame(songs: any[]) {
@@ -31,6 +35,10 @@ export class GameMasterService {
     if (!this.players.includes(playerName)) {
       GameMasterService.LOGGER.debug(`Player ${playerName} joined the game`);
       this.players.push(playerName);
+      this.pointsPerPlayer.push({
+        playerName: playerName,
+        points: 0
+      });
     } else {
       GameMasterService.LOGGER.error(`Player ${playerName} already registered!`);
     }
@@ -48,6 +56,10 @@ export class GameMasterService {
     return this.songsPlayed;
   }
 
+  getPointsPerPlayer(): PointsPerPlayerType {
+    return this.pointsPerPlayer;
+  }
+
   getRandomSongAndMarkAsPlayed(): any {
     const index = this.getRandomSongIndex();
     const song = this.songsAvailable[index];
@@ -62,6 +74,14 @@ export class GameMasterService {
     this.songsPlayed.push(
       this.songsAvailable.filter(x => x.id === songId)[0]
     );
+  }
+
+  addPoint(index: number): void {
+    this.pointsPerPlayer[index].points++;
+  }
+
+  removePoint(index: number): void {
+    this.pointsPerPlayer[index].points--;
   }
 
   private getRandomSongIndex(): number {
