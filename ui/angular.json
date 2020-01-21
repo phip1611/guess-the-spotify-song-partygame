@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "foobar": {
+    "song-game": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/foobar",
+            "outputPath": "dist/song-game",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -68,18 +68,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "foobar:build"
+            "browserTarget": "song-game:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "foobar:build:production"
+              "browserTarget": "song-game:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "foobar:build"
+            "browserTarget": "song-game:build"
           }
         },
         "test": {
@@ -117,16 +117,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "foobar:serve"
+            "devServerTarget": "song-game:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "foobar:serve:production"
+              "devServerTarget": "song-game:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "foobar"
+  "defaultProject": "song-game"
 }

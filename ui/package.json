@@ -1,11 +1,10 @@
 {
-  "name": "foobar",
+  "name": "guess-the-spotify-song-party-game",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
-    "start-public": "ng serve --open --host 0.0.0.0",
-    "build": "ng build",
+    "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -24,7 +23,7 @@
     "@angular/router": "~8.2.14",
     "bootstrap": "^4.4.1",
     "hammerjs": "^2.0.8",
-    "ng-log": "^1.3.0w",
+    "ng-log": "^1.3.0",
     "ngx-socket-io": "^3.0.1",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",

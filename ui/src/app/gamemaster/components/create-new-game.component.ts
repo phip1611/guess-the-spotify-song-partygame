@@ -53,7 +53,7 @@ export class CreateNewGameComponent implements OnInit {
   @Output()
   done = new EventEmitter();
 
-  constructor(private spotifyService: SpotifyApiService,
+  constructor(public spotifyService: SpotifyApiService,
               private gameMasterService: GameMasterService,
               private fb: FormBuilder) {
   }

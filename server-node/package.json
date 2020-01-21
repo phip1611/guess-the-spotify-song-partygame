@@ -8,13 +8,13 @@
     "start": "nodemon --config \"./nodemon.config.json\"/"
   },
   "devDependencies": {
+    "@types/socket.io": "^2.1.4",
     "@types/node": "^13.1.8",
     "nodemon": "^2.0.2",
-    "socket.io": "^2.3.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@types/socket.io": "^2.1.4"
+    "socket.io": "^2.3.0"
   }
 }
