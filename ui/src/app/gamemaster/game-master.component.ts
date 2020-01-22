@@ -6,7 +6,7 @@ import { SocketService } from '../common/socket.service';
   selector: 'app-game-master',
   template: `
     <app-gm-create-new-game *ngIf="state === 0"
-                       (done)="onNewGameCreated()"
+                            (done)="onNewGameCreated()"
     ></app-gm-create-new-game>
     <app-gm-show-link *ngIf="state === 1"
                       (done)="onGameStarted()"

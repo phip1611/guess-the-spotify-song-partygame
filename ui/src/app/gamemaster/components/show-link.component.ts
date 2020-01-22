@@ -1,8 +1,6 @@
-import { Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
-import { SpotifyApiService } from '../../common/spotify-api.service';
 import { GameMasterService } from '../game-master.service';
-import { switchMap } from 'rxjs/operators';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { SocketEventType } from '../../common/model/socket-events';
@@ -73,7 +71,9 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) { this.subscription.unsubscribe(); }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 }

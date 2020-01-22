@@ -38,9 +38,7 @@ const IMP_EXPORT_MODULES = [
 ];
 
 @NgModule({
-  declarations: [
-
-  ],
+  declarations: [],
   imports: [
     ...IMP_EXPORT_MODULES
   ],

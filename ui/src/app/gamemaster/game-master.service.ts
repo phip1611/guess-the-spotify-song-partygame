@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Log } from 'ng-log';
 
 export type PointsPerPlayerType = { playerName: string; points: number }[];
@@ -101,8 +100,8 @@ export class GameMasterService {
   }
 
   public static generateGameId(): string {
-    let result           = '';
-    const characters       = 'qwer1234';
+    let result = '';
+    const characters = 'qwer1234';
     const charactersLength = characters.length;
     for (let i = 0; i < 3; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));

@@ -22,7 +22,7 @@ import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.inte
   ],
   providers: [
 
-    { provide: HTTP_INTERCEPTORS, useClass: SpotifyTokenInterceptor, multi: true },
+    {provide: HTTP_INTERCEPTORS, useClass: SpotifyTokenInterceptor, multi: true},
 
   ],
   bootstrap: [AppComponent]

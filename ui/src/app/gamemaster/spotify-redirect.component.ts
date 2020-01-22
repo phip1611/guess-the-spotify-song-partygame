@@ -29,5 +29,4 @@ export class SpotifyRedirectComponent implements OnInit, OnDestroy {
   }
 
 
-
 }

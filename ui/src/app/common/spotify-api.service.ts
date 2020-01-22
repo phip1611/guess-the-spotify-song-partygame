@@ -42,7 +42,7 @@ export class SpotifyApiService {
 
   setAuthToken(authToken: string) {
     SpotifyApiService.LOGGER.debug('Auth token set!');
-    if (authToken){
+    if (authToken) {
       localStorage.setItem('SPOTIFY_AUTH_TOKEN', authToken);
     } else {
       localStorage.removeItem('SPOTIFY_AUTH_TOKEN');
@@ -83,9 +83,9 @@ export class SpotifyApiService {
    * Parses HTTPS://-Spotify-Links, "spotify:playlist:%id%"-Links and gives the ID back if found.
    * There is NO validation in here!
    *
-   * @param idString
+   * @param idString ID-String
    */
-  static parseIdString(idString: string): string | null {
+  static parseIdString(idString: string): string {
     idString = idString.trim();
     if (idString.startsWith('spotify:playlist:')) {
       return idString.split('spotify:playlist:')[1];

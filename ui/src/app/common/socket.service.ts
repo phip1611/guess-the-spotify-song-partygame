@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Socket } from 'ngx-socket-io';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Log } from 'ng-log';
 // tslint:disable-next-line:max-line-length
-import { GmCreateGamePayload, GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from './model/socket-events';
-import { SOCKET_URL } from './config/urls';
+import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from './model/socket-events';
 import { SocketProvider } from './socket.provider';
 
 @Injectable({

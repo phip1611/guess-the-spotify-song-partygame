@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Playback, PlayerBuzzerTimesType } from '../in-game.component';
+import { PlayerBuzzerTimesType } from '../in-game.component';
 
 @Component({
   selector: 'app-player-buzzer-times',

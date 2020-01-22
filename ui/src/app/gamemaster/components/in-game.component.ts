@@ -50,7 +50,8 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
           </div>
         </ng-container>
 
-        <ng-container *ngIf="showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length">
+        <ng-container
+          *ngIf="showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length">
           <div class="col-12 offset-0 col-lg-8 offset-lg-2">
             <app-spotify-songcard *ngIf="showSolution" [playback]="playback"></app-spotify-songcard>
             <app-player-buzzer-times *ngIf="buzzerTimeByPlayerName.length"
@@ -72,7 +73,6 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
           </div>
         </ng-container>
       </div>
-      
     </div>
   `
 })
@@ -149,13 +149,29 @@ export class InGameComponent implements OnInit {
  */
 export class Playback {
 
+  get playedOnce(): boolean {
+    return this._playedOnce;
+  }
+
+  get isPlaying(): boolean {
+    return this._isPlaying;
+  }
+
+  get firstPlayedTime(): Date {
+    return this._firstPlayedTime;
+  }
+
+  get spotifyTrack(): any {
+    return this._spotifyTrack;
+  }
+
   private static readonly LOGGER = new Log(Playback.name);
 
   private readonly _spotifyTrack: any;
 
-  private _playedOnce: boolean = false;
-
   private audio: HTMLAudioElement;
+
+  private _playedOnce: boolean = false;
 
   private _isPlaying: boolean = false;
 
@@ -184,22 +200,6 @@ export class Playback {
     this._isPlaying = false;
     this.audio.pause();
     this.audio.currentTime = 0; // reset for another playback
-  }
-
-  get playedOnce(): boolean {
-    return this._playedOnce;
-  }
-
-  get isPlaying(): boolean {
-    return this._isPlaying;
-  }
-
-  get spotifyTrack(): any {
-    return this._spotifyTrack;
-  }
-
-  get firstPlayedTime(): Date {
-    return this._firstPlayedTime;
   }
 
   getSongTitle(): string {

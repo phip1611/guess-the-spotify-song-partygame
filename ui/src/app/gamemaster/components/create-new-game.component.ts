@@ -94,10 +94,10 @@ export const spotifyPlaylistValidator: ValidatorFn = (control: AbstractControl):
   // length validation is not exact because i dont know
   // if spotify ids will always have a fixed length
   if (playlistId.length < 5 || playlistId.length > 40) {
-    return {length: 'input too short for a playlist id'}
+    return {length: 'input too short for a playlist id'};
   }
   if (!playlistId.match(/^[A-z0-9]+$/)) {
-    return {length: 'ID doesnt match [A-z0-9]+'}
+    return {length: 'ID doesnt match [A-z0-9]+'};
   }
 
   return null;
