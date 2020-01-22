@@ -32,11 +32,15 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
             </button>
           </div>
           <div class="col-12 col-md-4 mt-2 mt-md-0">
-            <button class="w-100"
+            <button *ngIf="gameMasterService.hasMoreSongs()" class="w-100"
                     [disabled]="!playback?.playedOnce || !solutionShowedOnce"
                     mat-raised-button color="primary"
                     (click)="onNextRound()">
               Nächste Runde
+            </button>
+            <button *ngIf="!gameMasterService.hasMoreSongs()" class="w-100"
+                    [disabled]="true" mat-raised-button>
+              Spiel vorbei :)
             </button>
           </div>
         </div>
@@ -78,6 +82,8 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 })
 export class InGameComponent implements OnInit {
 
+  private static readonly LOGGER = new Log(InGameComponent.name);
+
   isVeryFirstRound: boolean = true;
 
   playback: Playback;
@@ -90,7 +96,7 @@ export class InGameComponent implements OnInit {
 
   buzzerTimeByPlayerName: PlayerBuzzerTimesType = [];
 
-  constructor(private gameMasterService: GameMasterService,
+  constructor(public gameMasterService: GameMasterService,
               private socketService: SocketService) {
   }
 
@@ -120,6 +126,12 @@ export class InGameComponent implements OnInit {
   }
 
   onNextRound() {
+    // just increment the round counter
+    this.gameMasterService.nextRound();
+    InGameComponent.LOGGER.debug(
+      `Starting Round ${this.gameMasterService.getRound()}/${this.gameMasterService.getTotalRounds()}`
+    );
+
     this.showSolution = false;
 
     // disable all buzzer buttons

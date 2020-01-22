@@ -20,6 +20,10 @@ export class GameMasterService {
 
   private gameId: string;
 
+  private round: number;
+
+  private totalRounds: number;
+
   constructor() {
   }
 
@@ -30,13 +34,17 @@ export class GameMasterService {
   createGame(songs: any[]) {
     this.gameId = GameMasterService.generateGameId();
     this.songsAvailable = songs;
+    this.round = 0;
+    this.totalRounds = songs.length;
   }
 
-  destroyGame(songs: any[], rounds: number) {
+  /*destroyGame(songs: any[], rounds: number) {
     this.songsAvailable = [];
     this.players = [];
     this.gameId = null;
-  }
+    this.round = -1;
+    this.totalRounds = 0;
+  }*/
 
   addPlayer(playerName: string): void {
     if (!this.players.includes(playerName)) {
@@ -93,6 +101,22 @@ export class GameMasterService {
 
   removePoint(index: number): void {
     this.pointsPerPlayer[index].points--;
+  }
+
+  nextRound(): void {
+    this.round++;
+  }
+
+  getRound(): number {
+    return this.round;
+  }
+
+  getTotalRounds(): number {
+    return this.totalRounds;
+  }
+
+  hasMoreSongs(): boolean {
+    return this.songsAvailable.length > 0;
   }
 
   private getRandomSongIndex(): number {
