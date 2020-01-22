@@ -9,10 +9,16 @@ import { SocketEventType } from '../../common/model/socket-events';
   selector: 'app-player-in-game',
   template: `
     <mat-card>
-      <button mat-raised-button color="warn" class="w-100" style="height: 400px; font-size: 30px"
+      <p class="text-center">Bitte während des Spiels nicht zwischen WLAN und mobilem Internet wechseln!</p>
+    </mat-card>
+
+    <mat-card class="mt-3">
+      <button mat-raised-button color="warn" class="w-100"
+              style="height: 450px; font-size: 36px"
               [disabled]="!buzzerEnabled"
               (click)="onBuzzered()"
-      >Buzzer</button>
+      >BUZZER
+      </button>
     </mat-card>
   `
 })
