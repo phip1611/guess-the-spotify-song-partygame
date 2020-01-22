@@ -7,7 +7,7 @@ import { SpotifyRedirectComponent } from './gamemaster/spotify-redirect.componen
 
 const routes: Routes = [
   {
-    path: 'game',
+    path: 'game/:id',
     component: PlayerComponent
   },
   {

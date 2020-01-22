@@ -19,16 +19,24 @@ export class GameMasterService {
 
   private pointsPerPlayer: PointsPerPlayerType = [];
 
+  private gameId: string;
+
   constructor() {
   }
 
+  /**
+   * There can only be one game at a time. We have the complete state (for the gm)
+   * for the game in this service.
+   */
   createGame(songs: any[]) {
+    this.gameId = GameMasterService.generateGameId();
     this.songsAvailable = songs;
   }
 
   destroyGame(songs: any[], rounds: number) {
     this.songsAvailable = [];
     this.players = [];
+    this.gameId = null;
   }
 
   addPlayer(playerName: string): void {
@@ -54,6 +62,10 @@ export class GameMasterService {
 
   getSongsPlayed(): any[] {
     return this.songsPlayed;
+  }
+
+  getGameId(): string {
+    return this.gameId;
   }
 
   getPointsPerPlayer(): PointsPerPlayerType {
@@ -86,6 +98,16 @@ export class GameMasterService {
 
   private getRandomSongIndex(): number {
     return Math.floor(Math.random() * this.songsAvailable.length);
+  }
+
+  public static generateGameId(): string {
+    let result           = '';
+    const characters       = 'qwer1234';
+    const charactersLength = characters.length;
+    for (let i = 0; i < 3; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 
 }

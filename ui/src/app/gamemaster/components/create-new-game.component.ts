@@ -19,7 +19,7 @@ import { HttpErrorResponse } from '@angular/common/http';
         </div>
       </mat-card>
     </ng-container>
-    
+
     <mat-card *ngIf="spotifyService.isConnected()">
       <div class="row">
         <div class="col-2 col-lg-1 mt-3 text-center">

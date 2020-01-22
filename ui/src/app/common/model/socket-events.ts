@@ -16,9 +16,9 @@ export enum SocketEventType {
 }
 
 /**
- * Notify clients they can register.
+ * Notify clients they can register. The payload is the game id.
  */
-export type GmCreateGamePayload = void;
+export type GmCreateGamePayload = string;
 /**
  * Notify clients buzzer is enabled.
  */
@@ -37,9 +37,10 @@ export type PlayerRegisterPayload = string;
  */
 export type PlayerBuzzerPayload = string;
 /**
- * Notify game master a player hit the button.
+ * Notify game master a player hit the button. The payload is the game ID
+ * the client wants to join.
  */
-export type PlayerHelloPayload = void;
+export type PlayerHelloPayload = string;
 
 export type SocketPayload = GmCreateGamePayload |
   GmEnableBuzzerPayload |

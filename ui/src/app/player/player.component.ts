@@ -1,40 +1,38 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
 import { SocketEventType } from '../common/model/socket-events';
-import { take } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-player',
   template: `
-    <app-player-waiting-for-game *ngIf="state === 0"
-                                 (done)="onGameCreated()"
-    ></app-player-waiting-for-game>
-    <app-player-join-game *ngIf="state === 1"
+    <app-player-join-game *ngIf="state === 0"
                           (done)="onGameStarts()"
     ></app-player-join-game>
-    <app-player-in-game *ngIf="state === 2"
+    <app-player-in-game *ngIf="state === 1"
     ></app-player-in-game>
   `
 })
-export class PlayerComponent implements OnInit, OnDestroy {
+export class PlayerComponent implements OnInit {
 
   private static readonly LOGGER = new Log(PlayerComponent.name);
 
-  state: PlayerState = PlayerState.WAITING_FOR_GAME;
+  state: PlayerState = PlayerState.JOIN_GAME;
 
-  constructor(private socketService: SocketService) {
+  constructor(private socketService: SocketService,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
-    // let server know we can listen
-    this.socketService.sendMessage({
-      payload: null,
-      type: SocketEventType.PLAYER_HELLO
-    });
-  }
-
-  ngOnDestroy(): void {
+    const gameId = this.route.snapshot.paramMap.get('id');
+    if (gameId) {
+      // let server know we can listen
+      this.socketService.sendMessage({
+        payload: gameId,
+        type: SocketEventType.PLAYER_HELLO
+      });
+    }
   }
 
 
@@ -49,7 +47,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
 
 export enum PlayerState {
-  WAITING_FOR_GAME,
   JOIN_GAME,
   IN_GAME
 }

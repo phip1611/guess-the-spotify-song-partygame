@@ -39,24 +39,25 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(ShowLinkComponent.name);
 
-  private subscription: Subscription;
-
   public player: string[] = [];
 
-  public joinGameUrl: string = JOIN_GAME_URL;
+  public joinGameUrl: string;
 
   @Output()
   done = new EventEmitter();
 
+  private subscription: Subscription;
+
   constructor(private gameMasterService: GameMasterService,
               private socketService: SocketService) {
+    this.joinGameUrl = JOIN_GAME_URL + '/' + gameMasterService.getGameId();
   }
 
 
   ngOnInit(): void {
     // when this component is shown its because the game was just created
     this.socketService.sendMessage({
-      payload: null,
+      payload: this.gameMasterService.getGameId(),
       type: SocketEventType.GM_CREATE_GAME
     });
 

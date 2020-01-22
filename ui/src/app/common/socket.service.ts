@@ -23,11 +23,12 @@ export class SocketService {
     this.socket.emit(event.type, event.payload);
   }
 
+  /* This will never be send from the server back to a client
   getGameCreated(): Observable<GmCreateGamePayload> {
     return this.socket
       .fromEvent(SocketEventType.GM_CREATE_GAME)
       .pipe(map(x => x as GmCreateGamePayload));
-  }
+  }*/
 
   getPlayerRegistered(): Observable<PlayerRegisterPayload> {
     return this.socket
