@@ -15,6 +15,25 @@ It's recommended to use a big screen
 where the moderator can show the solutions, which players
 has the most points and so on :)
 
+## Learnings
+I learned how to work with Web Sockets (with socket.io).
+This was my first project with realtime functionality. Quite interesting stuff!
+
+
 ## Build + Run
-$ sh build.sh
-$ docker run -p 8080:8080 phip1611:guess-spotify-song-game
+`$ sh build.sh`\
+`$ docker run -p 8080:8080 phip1611:guess-spotify-song-game`
+
+# How to play
+Game master visits http://localhost:8080 (or http://domain.tld:8080)
+and starts the game. He should share his display with everyone
+ for example on a big TV or a projector. An invitation link for other players will be generated
+that looks like this: http://localhost/game/123
+
+The game master himself can participate the game as well if
+he joines in with another device.
+
+Giving points to the players is up to the game master.
+
+The only functionality on the players devices is the buzzer button and
+of course the selection of a player name.
