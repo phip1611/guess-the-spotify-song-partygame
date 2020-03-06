@@ -10,12 +10,22 @@ export class PlayerService {
 
   private playerName: string;
 
+  private gameId: string;
+
   getPlayerName(): string {
     return this.playerName;
   }
 
   setPlayerName(playerName: string): void {
     this.playerName = playerName;
+  }
+
+  getGameId(): string {
+    return this.playerName;
+  }
+
+  setGameId(gameId: string): void {
+    this.gameId = gameId;
   }
 
 }

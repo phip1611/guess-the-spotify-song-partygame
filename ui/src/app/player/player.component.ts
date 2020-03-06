@@ -3,6 +3,7 @@ import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
 import { SocketEventType } from '../common/model/socket-events';
 import { ActivatedRoute } from '@angular/router';
+import { PlayerService } from './player-master.service';
 
 @Component({
   selector: 'app-player',
@@ -21,13 +22,15 @@ export class PlayerComponent implements OnInit {
   state: PlayerState = PlayerState.JOIN_GAME;
 
   constructor(private socketService: SocketService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private playerService: PlayerService) {
   }
 
   ngOnInit(): void {
     const gameId = this.route.snapshot.paramMap.get('id');
     if (gameId) {
       // let server know we can listen
+      this.playerService.setGameId(gameId);
       this.socketService.sendMessage({
         payload: gameId,
         type: SocketEventType.PLAYER_HELLO

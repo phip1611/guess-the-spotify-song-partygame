@@ -5,6 +5,7 @@ import { Log } from 'ng-log';
 // tslint:disable-next-line:max-line-length
 import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from './model/socket-events';
 import { SocketProvider } from './socket.provider';
+import { PlayerService } from '../player/player-master.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,21 @@ export class SocketService {
 
   private static readonly LOGGER = new Log(SocketService.name);
 
-  constructor(private socket: SocketProvider) {
+  constructor(private socket: SocketProvider,
+              private playerService: PlayerService) {
+    socket.on('disconnect', () => {
+      socket.connect();
+      // TODO refactor; now we have player-specific code in common :/
+      if (playerService.getPlayerName() && playerService.getGameId()) {
+        console.warn('io server disconnect während laufendem Spiel aufgetreten; reconnecten');
+
+        this.sendMessage({
+          payload: playerService.getPlayerName(),
+          type: SocketEventType.PLAYER_HELLO
+        });
+      }
+      // else the socket will automatically try to reconnect
+    });
   }
 
   sendMessage(event: SocketEvent) {

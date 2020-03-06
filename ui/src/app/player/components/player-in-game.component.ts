@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
-import { PlayerService } from '../game-master.service';
+import { PlayerService } from '../player-master.service';
 import { SocketEventType } from '../../common/model/socket-events';
 
 @Component({

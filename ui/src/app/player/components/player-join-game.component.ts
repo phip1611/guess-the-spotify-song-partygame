@@ -4,7 +4,7 @@ import { SocketService } from '../../common/socket.service';
 import { SocketEventType } from '../../common/model/socket-events';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
-import { PlayerService } from '../game-master.service';
+import { PlayerService } from '../player-master.service';
 
 @Component({
   selector: 'app-player-join-game',

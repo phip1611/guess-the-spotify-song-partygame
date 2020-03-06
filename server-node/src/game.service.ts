@@ -64,7 +64,11 @@ export class GameService {
 
             this.games.get(gameId).addPlayer(socket);
             this.setUpPlayerSocketEvents(socket, gameId);
-        })
+        });
+
+        socket.on('disconnect', reason => {
+            console.info('A socket disconnected: ' + reason);
+        });
     }
 
     /**
