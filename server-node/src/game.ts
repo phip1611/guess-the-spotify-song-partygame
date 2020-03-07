@@ -54,4 +54,5 @@ export class Game {
         }
         this._gameMaster = value;
     }
+
 }

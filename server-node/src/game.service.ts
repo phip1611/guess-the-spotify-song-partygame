@@ -12,19 +12,34 @@ import { Client } from './client';
  */
 export class GameService {
 
-    private static io: SocketIO.Server;
+    private static instance: GameService;
 
-    private static games: Map<String, Game> = new Map<String, Game>();
+    private _games: Map<String, Game> = new Map<String, Game>();
 
     /**
      * This map helps us to manage reconnects. Once a client wants to reconnect we can lookup
      * the game its socket should be attached to.
      */
-    private static clientMap: Map<string, Game> = new Map<string, Game>();
+    private _clientMap: Map<string, Game> = new Map<string, Game>();
 
-    public static init() {
-        this.io = AppServer.getSocketIo();
-        this.io.on('connect', (socket => {
+    private initDone: boolean = false;
+
+    private constructor() {
+    }
+
+    public static getInstance(): GameService {
+        if (this.instance) return this.instance;
+        return this.instance = new GameService();
+    }
+
+    public init() {
+        if (this.initDone) {
+            throw new Error('Init already done!');
+        } else {
+            this.initDone = true;
+        }
+
+        AppServer.getInstance().getSocketIo().on('connect', (socket => {
             console.log('client connected');
             this.setUpSocketEventsHandler(socket);
         }));
@@ -37,25 +52,25 @@ export class GameService {
      *
      * @param socket
      */
-    private static setUpSocketEventsHandler(socket: SocketIO.Socket) {
+    private setUpSocketEventsHandler(socket: SocketIO.Socket) {
 
         /**
          * GM_CREATE_GAME means that the game master connects with the server.
          * This event will not be forwarded to any player.
          */
         socket.on(SocketEventType.GM_CREATE_GAME, (gameId: GmCreateGamePayload) => {
-            if (this.games.has(gameId)) {
+            if (this._games.has(gameId)) {
                 console.error(`Game id '${gameId}' already used!`);
                 return;
             }
 
             const gameMaster = new Client(socket);
             const game = new Game(gameId, gameMaster);
-            this.clientMap.set(gameMaster.uuid, game);
+            this._clientMap.set(gameMaster.uuid, game);
 
             console.log(`new game created with id '${gameId}'; game master is '${gameMaster.uuid}'`);
 
-            this.games.set(gameId, new Game(gameId, gameMaster));
+            this._games.set(gameId, new Game(gameId, gameMaster));
             this.setUpGmForwardSocketEventsHandler(socket, game);
         });
 
@@ -64,15 +79,15 @@ export class GameService {
          * This event will not be forwarded to the game master.
          */
         socket.on(SocketEventType.PLAYER_HELLO, (gameId: PlayerHelloPayload) => {
-            if (!this.games.has(gameId)) {
+            if (!this._games.has(gameId)) {
                 console.error('PLAYER_HELLO: No game with this ID found!');
                 return;
             }
 
-            console.log(`player joined game with id '${gameId}'`);
-
-            const game = this.games.get(gameId);
-            game.addPlayer(new Client(socket));
+            const player = new Client(socket);
+            const game = this._games.get(gameId);
+            game.addPlayer(player);
+            console.log(`player joined game id '${gameId}' with uuid '${player.uuid}'`);
             this.setUpForwardPlayerSocketEventsHandler(socket, game);
         });
 
@@ -80,7 +95,7 @@ export class GameService {
          * GM_RECONNECT means a game master want to rejoin an existing game.
          */
         socket.on(SocketEventType.GM_RECONNECT, (uuid: GmReconnectPayload) => {
-            const game = this.clientMap.get(uuid);
+            const game = this._clientMap.get(uuid);
             if (!game) {
                 console.error(`GM_RECONNECT with id '${uuid}' unknown!`);
                 return;
@@ -94,7 +109,7 @@ export class GameService {
          * PLAYER_RECONNECT means a game master want to rejoin an existing game.
          */
         socket.on(SocketEventType.PLAYER_RECONNECT, (uuid: PlayerReconnectPayload) => {
-            const game = this.clientMap.get(uuid);
+            const game = this._clientMap.get(uuid);
             if (!game) {
                 console.error(`GM_RECONNECT with id '${uuid}' unknown!`);
                 return;
@@ -115,7 +130,7 @@ export class GameService {
      * In principle all of these events will be broadcasted
      * to all players of the game.
      */
-    private static setUpGmForwardSocketEventsHandler(socket: SocketIO.Socket, game: Game) {
+    private setUpGmForwardSocketEventsHandler(socket: SocketIO.Socket, game: Game) {
         socket.on(SocketEventType.GM_START_NEXT_ROUND, () => {
             // received from game master
             console.log(`notify all clients that next game round has started (for game '${game.id}')`);
@@ -135,7 +150,7 @@ export class GameService {
      * In principle all of these events will be send
      * to the game master of the game.
      */
-    private static setUpForwardPlayerSocketEventsHandler(socket: SocketIO.Socket, game: Game) {
+    private setUpForwardPlayerSocketEventsHandler(socket: SocketIO.Socket, game: Game) {
         socket.on(SocketEventType.PLAYER_REGISTER, (data) => {
             console.log(`send PLAYER_REGISTER(${data}) to game master (for game '${game.id}')`);
             game.gameMaster.socket.emit(SocketEventType.PLAYER_REGISTER, data);
@@ -148,29 +163,43 @@ export class GameService {
         });
     }
 
-    private static setUpRemovalOfOldGamesInterval() {
+    private setUpRemovalOfOldGamesInterval() {
         const limit = 1000 * 60 * 60 * 2; // two hours in milli seconds
         const that = this;
         setInterval(() => this.removalOfOldGames(that), limit)
     }
 
-    private static removalOfOldGames(context: any) {
+    private removalOfOldGames(context: any) {
         console.log('removing old games now');
-        if (context.games.size === 0) { return; }
+        if (context._games.size === 0) { return; }
         const limit = 1000 * 60 * 60 * 2; // two hours in milli seconds
         const currentTime = new Date().getTime();
         const idsToRemove = [];
-        context.games.forEach((game) => {
+        context._games.forEach((game) => {
             if (currentTime - game.started.getTime() > limit) {
                 console.log(`removing game '${game.id}'`);
                 idsToRemove.push(game.id);
             }
         });
         idsToRemove.forEach(id => {
-            const game = context.games.get(id);
+            const game = context._games.get(id);
             game.gameMaster.socket.disconnect(true);
             game.players.map(p => p.socket).forEach(s => s.disconnect(true));
-            context.games.delete(id)
+            context._games.delete(id)
         });
+    }
+
+
+    get games(): Map<String, Game> {
+        return this._games;
+    }
+
+    get clientMap(): Map<string, Game> {
+        return this._clientMap;
+    }
+
+    reset() {
+        this._games.clear();
+        this._clientMap.clear();
     }
 }
