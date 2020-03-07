@@ -11,8 +11,14 @@ export class Client {
 
     private _socket: Socket;
 
-    constructor(socket: Socket) {
-        this._uuid = uuidv4();
+    /**
+     * If the client reconnects we use the same uuid.
+     *
+     * @param socket
+     * @param uuid
+     */
+    constructor(socket: Socket, uuid?: string) {
+        this._uuid = uuid ? uuid : uuidv4();
         this._socket = socket;
     }
 
@@ -22,5 +28,18 @@ export class Client {
 
     get socket(): Socket {
         return this._socket;
+    }
+
+    // returns the client id of the connection from socket io
+    // useful for debugging
+    get socketIoClientId(): string {
+        return this._socket.client.id;
+    }
+
+    public toPrintable() {
+        return {
+            uuid: this.uuid,
+            socketIoClientId: this.socketIoClientId
+        }
     }
 }

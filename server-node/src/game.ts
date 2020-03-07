@@ -1,4 +1,5 @@
 import { Client } from './client';
+import { Log } from './log';
 
 /**
  * Represents a active game. Holds only information that is necessary to make connection between
@@ -27,6 +28,12 @@ export class Game {
         this._players.push(player);
     }
 
+    public removePlayer(clientUuid: string) {
+        const index = this.players.findIndex(p => p.uuid === clientUuid);
+        if (index === -1) return;
+        this.players.splice(index, 1);
+    }
+
     get id(): string {
         return this._id;
     }
@@ -44,15 +51,30 @@ export class Game {
     }
 
     /**
-     * Will be used to reconnect the game master to the session.
+     * Will be used to reconnect the game master to the session. The new gameMaster
+     * will have of course the same client id but a different socket io client id.
      *
      * @param value
      */
     set gameMaster(value: Client) {
-        if (this._gameMaster) {
+        if (this._gameMaster.socketIoClientId !== value.socketIoClientId) {
+            Log.disconnectedSocket(this._gameMaster, 'gameMaster');
             this._gameMaster.socket.disconnect(true);
+        } else {
+            console.warn(`Log#gameMaster: called setter but the socket is the same! ${value.toPrintable()}`);
         }
+
+
         this._gameMaster = value;
+    }
+
+    public toPrintable() {
+        return {
+            id: this.id,
+            gameMaster: this.gameMaster.toPrintable(),
+            players: this.players.map(p => p.toPrintable()),
+            started: this.started.toISOString()
+        }
     }
 
 }
