@@ -98,7 +98,8 @@ export class GameService {
             console.info('A socket reconnected');
         });
 
-        socket.on('disconnect', reason => {
+        // socket.on('disconnect', reason => {
+        socket.once('disconnect', reason => {
             console.info('A socket disconnected: ' + reason);
         });
     }

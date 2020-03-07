@@ -10,7 +10,8 @@ import { GameService } from './game.service';
 
   I never experienced this in my "real world testing", only here in the testing suite..
 
-  therefore I assume it might be okay..
+  therefore I assume it might be okay.. so if this tests works from "time to time"
+  it should show that the logic works... despite the networking problems..
  */
 
 const TEST_PORT = 63246;
@@ -45,6 +46,8 @@ beforeEach(async () => {
 
 
 afterEach(() => {
+    GameService.getInstance().reset();
+
     if (gameMaster.connected) {
         gameMaster.disconnect();
     }
@@ -61,11 +64,29 @@ afterEach(() => {
  */
 afterAll(() => {
     AppServer.getInstance().close();
-    GameService.getInstance().reset();
 });
 
 test('play game regular', async () => {
     await _testPlayRegularGame();
+});
+
+test('play game with soft reset', async () => {
+    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGame();
+
+    gameMaster.disconnect();
+    player1.disconnect();
+    player2.disconnect();
+
+    gameMaster.connect();
+    player1.connect();
+    player2.connect();
+
+    const a = await reconnectGmAndServerConfirmEvent(gameMaster, gameMasterUuid);
+    expect(a).toBe(gameMasterUuid);
+    const b = await reconnectPlayerAndServerConfirmEvent(player1, player1Uuid);
+    expect(b).toBe(player1Uuid);
+    const c = await reconnectPlayerAndServerConfirmEvent(player2, player2Uuid);
+    expect(c).toBe(player2Uuid);
 });
 
 test('play game with hard reset', async () => {
@@ -192,8 +213,6 @@ async function reconnectPlayerAndServerConfirmEvent(socket: SocketIOClient.Socke
 async function reconnectGmAndServerConfirmEvent(socket: SocketIOClient.Socket, gmUuid: string): Promise<string> {
     return new Promise(resolve => {
         socket.once(SocketEventType.SERVER_CONFIRM, uuid => resolve(uuid));
-        socket.emit(SocketEventType.GM_RECONNECT, gmUuid);
-        socket.emit(SocketEventType.GM_RECONNECT, gmUuid);
         socket.emit(SocketEventType.GM_RECONNECT, gmUuid);
     });
 }
