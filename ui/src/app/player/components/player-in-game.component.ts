@@ -3,7 +3,7 @@ import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { PlayerService } from '../player-master.service';
-import { SocketEventType } from '../../common/model/socket-events';
+import { SocketEventType } from '../../../../../common-ts/socket-events';
 
 @Component({
   selector: 'app-player-in-game',

@@ -1,7 +1,7 @@
 import * as SocketIO from 'socket.io';
 import { AppServer } from './app-server';
-import { SocketEventType } from './socket-events';
 import { Game } from './game';
+import { SocketEventType } from '../../common-ts/socket-events';
 
 /**
  * The game service only manages the communication between

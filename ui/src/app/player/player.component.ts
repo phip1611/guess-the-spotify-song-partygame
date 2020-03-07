@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
-import { SocketEventType } from '../common/model/socket-events';
 import { ActivatedRoute } from '@angular/router';
 import { PlayerService } from './player-master.service';
+import { SocketEventType } from '../../../../common-ts/socket-events';
 
 @Component({
   selector: 'app-player',

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Log } from 'ng-log';
 // tslint:disable-next-line:max-line-length
-import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from './model/socket-events';
+import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, SocketEvent, SocketEventType } from '../../../../common-ts/socket-events';
 import { SocketProvider } from './socket.provider';
 import { PlayerService } from '../player/player-master.service';
 

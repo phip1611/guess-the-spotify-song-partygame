@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
-import { SocketEventType } from '../../common/model/socket-events';
 import { Subscription } from 'rxjs';
 import { Log } from 'ng-log';
+import { SocketEventType } from '../../../../../common-ts/socket-events';
 
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 

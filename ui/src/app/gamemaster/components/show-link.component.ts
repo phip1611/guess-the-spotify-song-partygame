@@ -3,8 +3,8 @@ import { Log } from 'ng-log';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
-import { SocketEventType } from '../../common/model/socket-events';
 import { JOIN_GAME_URL } from '../../common/config/urls';
+import { SocketEventType } from '../../../../../common-ts/socket-events';
 
 @Component({
   selector: 'app-gm-show-link',
