@@ -3,6 +3,9 @@ import * as express from 'express';
 import * as http from 'http';
 import * as SocketIO from 'socket.io';
 
+/**
+ * Initializes express and socket.io. Serves /public files. Angular lies there when the application is build.
+ */
 export class AppServer {
 
     public static readonly ROOT_DIR = dirname(require.main.filename);
@@ -39,7 +42,7 @@ export class AppServer {
 
     public static getSocketIo(): SocketIO.Server {
         if (!this.initDone) {
-            throw new Error('init done done yet!');
+            throw new Error('init not done yet!');
         }
         return this.socketIo;
     }
