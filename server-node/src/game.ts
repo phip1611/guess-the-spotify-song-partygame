@@ -9,7 +9,7 @@ export class Game {
     /**
      * The ID of the game.
      */
-    private readonly _id: String;
+    private readonly _id: string;
 
     private _gameMaster: Client;
 
@@ -17,7 +17,7 @@ export class Game {
 
     private readonly _started: Date;
 
-    constructor(id: String, gameMaster: Client) {
+    constructor(id: string, gameMaster: Client) {
         this._id = id;
         this._gameMaster = gameMaster;
         this._started = new Date();
@@ -27,7 +27,7 @@ export class Game {
         this._players.push(player);
     }
 
-    get id(): String {
+    get id(): string {
         return this._id;
     }
 
