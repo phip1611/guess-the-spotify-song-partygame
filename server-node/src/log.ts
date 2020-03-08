@@ -12,7 +12,7 @@ export class Log {
     }
 
     static disconnectedSocket(client: Client) {
-        this.log(`Socket disconnected for '${ClientType[client.type]}', socketIoClientId: '${client.socketIoClientId}', clientUuid: '${client.uuid}'`);
+        this.log(`Socket disconnected for '${client.type}', socketIoClientId: '${client.socketIoClientId}', clientUuid: '${client.uuid}'`);
     }
 
     static log(msg: string | object): void {

@@ -1,18 +1,23 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Socket } from 'socket.io';
 import { Log } from './log';
+import { GameId } from './game';
+
+export type ClientUuid = string;
 
 /**
  * Represents a client that is connected through socket.io to a Game. A client can be
  * 'dead' which means its socket is null. This is no valid initial state but can happen
  * if its socket disconnects. This way we invalidated the socket but still can have
  * the clientUuid inside a game to make reconnects possible.
+ *
+ * If a client reconnects this instance will be thrown away and a new will be attached to the game.
  */
 export class Client {
 
     private readonly _type: ClientType;
 
-    private readonly _uuid: string;
+    private readonly _uuid: ClientUuid;
 
     private _socket: Socket;
 
@@ -23,12 +28,11 @@ export class Client {
      * @param type
      * @param uuid
      */
-    constructor(socket: Socket, type: ClientType, uuid?: string) {
+    constructor(socket: Socket, type: ClientType, uuid?: ClientUuid) {
         if (!socket) {
             throw new Error('Socket is null!');
         }
-        // !type doesnt work because it is a enum and "0" is a valid value
-        if (type === undefined || type === null) {
+        if (!type) {
             throw new Error('type is null!');
         }
         this._uuid = uuid ? uuid : uuidv4();
@@ -36,7 +40,7 @@ export class Client {
         this._socket = socket;
     }
 
-    get uuid(): string {
+    get uuid(): ClientUuid {
         return this._uuid;
     }
 
@@ -88,6 +92,17 @@ export class Client {
 }
 
 export enum ClientType {
-    GAME_MASTER,
-    PLAYER,
+    GAME_MASTER = 'GAME_MASTER',
+    PLAYER = 'PLAYER',
+}
+
+/**
+ * Describes the meta information the game service holds about all clients to
+ * make reconnects easier/more fault tolerant. This information shall
+ * survives disconnects of the socket so that reconnects with a
+ * client uuid are possible.
+ */
+export interface CachedClientState {
+    gameId: GameId;
+    clientType: ClientType
 }

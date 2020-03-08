@@ -1,10 +1,10 @@
 import * as SocketIO from 'socket.io';
 import { Socket } from 'socket.io';
 import { AppServer } from './app-server';
-import { Game } from './game';
+import { Game, GameId } from './game';
 import { GmCreateGamePayload, GmReconnectPayload, PlayerBuzzerPayload, PlayerHelloPayload, PlayerReconnectPayload, PlayerRegisterPayload, SocketEventType } from '../../common-ts/socket-events';
 import { Log } from './log';
-import { Client, ClientType } from './client';
+import { Client, CachedClientState, ClientType, ClientUuid } from './client';
 
 /**
  * The game service only manages the communication between
@@ -19,7 +19,7 @@ export class GameService {
     /**
      * Map of all active gameIdToGameMap. Map from game id to game.
      */
-    private _gameIdToGameMap: Map<string, Game> = new Map<string, Game>();
+    private _gameIdToGameMap: Map<GameId, Game> = new Map();
 
     /**
      * This map helps us to manage reconnects. Once a client wants to reconnect we can lookup
@@ -28,7 +28,7 @@ export class GameService {
      * Key: clientUuid
      * Value: GameID
      */
-    private _clientUuidToGameIdMap: Map<string, string> = new Map<string, string>();
+    private _clientUuidMap: Map<ClientUuid, CachedClientState> = new Map();
 
     /**
      * This map is a mapping from socketIoClientId to client.
@@ -36,7 +36,7 @@ export class GameService {
      * Key: socketIoClientId
      * Value: Client
      */
-    private _socketIoClientIdToClientMap: Map<string, Client> = new Map<string, Client>();
+    private _socketIoClientIdToClientMap: Map<string, Client> = new Map();
 
     private initDone: boolean = false;
 
@@ -137,7 +137,7 @@ export class GameService {
 
         // socket.on('disconnect', reason => {
         socket.once('disconnect', reason => {
-            Log.info(`A socket disconnected: ${reason}`);
+            Log.info(`Socket '${socket.client.id}' disconnected because of: ${reason}`);
             const client = this._socketIoClientIdToClientMap.get(socket.client.id);
             if (!client) return;
 
@@ -145,7 +145,7 @@ export class GameService {
             // remove the "socket" object inside client / make it null
             client.disconnect();
 
-            // NO! this._clientUuidToGameIdMap.delete(client.uuid);
+            // NO! this._clientUuidMap.delete(client.uuid);
             this._socketIoClientIdToClientMap.delete(socket.client.id);
         });
     }
@@ -163,19 +163,24 @@ export class GameService {
     private addClientToGame(type: SocketEventType, socket: Socket, id: string, clientType: ClientType): string {
         const isReconnect = type === SocketEventType.GM_RECONNECT || type === SocketEventType.PLAYER_RECONNECT;
 
-        let clientUuid = null;
-        let gameId = null;
+        let clientUuid: ClientUuid = null;
+        let gameId: GameId = null;
 
         if (isReconnect) {
             // id is clientUuid
             clientUuid = id;
 
-            if (!this._clientUuidToGameIdMap.has(clientUuid)) {
+            const cachedClientState = this._clientUuidMap.get(clientUuid);
+            if (!cachedClientState) {
                 Log.error(`Unknown client uuid ${clientUuid}!`);
                 throw new Error(`Unknown client uuid ${clientUuid}!`);
             }
+            if (cachedClientState.clientType !== clientType) {
+                Log.error(`Client uuid ${clientUuid} is known but type is different? expected=${cachedClientState.clientType}, actual=${clientType}`);
+                throw new Error(`Client uuid ${clientUuid} is known but type is different? expected=${cachedClientState.clientType}, actual=${clientType}`);
+            }
 
-            gameId = this._clientUuidToGameIdMap.get(clientUuid);
+            gameId = this._clientUuidMap.get(clientUuid).gameId;
         } else {
             gameId = id;
         }
@@ -211,7 +216,7 @@ export class GameService {
 
 
         this._socketIoClientIdToClientMap.set(client.socketIoClientId, client);
-        this._clientUuidToGameIdMap.set(client.uuid, gameId);
+        this._clientUuidMap.set(client.uuid, {clientType: clientType, gameId: gameId});
 
         Log.eventSent(SocketEventType.SERVER_CONFIRM, gameId, clientUuid, client.socketIoClientId, clientUuid);
         socket.emit(SocketEventType.SERVER_CONFIRM, clientUuid);
@@ -286,22 +291,22 @@ export class GameService {
         idsToRemove.forEach(id => {
             const game = context.gameIdToGameMap.get(id);
             game.gameMaster.socket.disconnect(true);
-            context.clientUuidToGameIdMap.delete(game.gameMaster.uuid);
+            context.clientUuidMap.delete(game.gameMaster.uuid);
             game.players.forEach(p => {
                 p.disconnect();
-                context.clientUuidToGameIdMap.delete(p.uuid);
+                context.clientUuidMap.delete(p.uuid);
             });
             context.gameIdToGameMap.delete(id);
         });
     }
 
 
-    get gameIdToGameMap(): Map<string, Game> {
+    get gameIdToGameMap(): Map<GameId, Game> {
         return this._gameIdToGameMap;
     }
 
-    get clientUuidToGameIdMap(): Map<string, string> {
-        return this._clientUuidToGameIdMap;
+    get clientUuidMap(): Map<ClientUuid, CachedClientState> {
+        return this._clientUuidMap;
     }
 
     get socketIoClientIdToClientMap(): Map<string, Client> {
@@ -310,7 +315,7 @@ export class GameService {
 
     reset() {
         this._gameIdToGameMap.clear();
-        this._clientUuidToGameIdMap.clear();
+        this._clientUuidMap.clear();
         this._socketIoClientIdToClientMap.clear();
     }
 }

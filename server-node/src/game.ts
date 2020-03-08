@@ -1,5 +1,7 @@
 import { Client, ClientType } from './client';
 
+export type GameId = string;
+
 /**
  * Represents a active game. Holds only information that is necessary to make connection between
  * game master and players as well as reconnects possible.
@@ -11,7 +13,7 @@ export class Game {
     /**
      * The ID of the game.
      */
-    private readonly _id: string;
+    private readonly _id: GameId;
 
     private _gameMaster: Client;
 
@@ -66,7 +68,7 @@ export class Game {
     }
 
 
-    get id(): string {
+    get id(): GameId {
         return this._id;
     }
 

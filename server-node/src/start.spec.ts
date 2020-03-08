@@ -2,6 +2,7 @@ import * as socketIoClient from 'socket.io-client';
 import { SocketEventType } from '../../common-ts/socket-events';
 import { AppServer } from './app-server';
 import { GameService } from './game.service';
+import { Game } from './game';
 
 const TEST_PORT = 63246;
 
@@ -75,7 +76,7 @@ test('play game regular', async () => {
     expect(GameService.getInstance().socketIoClientIdToClientMap.size).toBe(0);
 
     // NOW! This has to be stay on the server! to make reconnects possible
-    // expect(GameService.getInstance().clientUuidToGameIdMap.size).toBe(0);
+    // expect(GameService.getInstance().clientUuidMap.size).toBe(0);
 });
 
 test('play game with soft reset', async () => {
@@ -89,22 +90,42 @@ test('play game with soft reset', async () => {
     player1.connect();
     player2.connect();
 
-    const a = await reconnectGmAndServerConfirmEvent(gameMaster, gameMasterUuid);
-    expect(a).toBe(gameMasterUuid);
-    const b = await reconnectPlayerAndServerConfirmEvent(player1, player1Uuid);
-    expect(b).toBe(player1Uuid);
-    const c = await reconnectPlayerAndServerConfirmEvent(player2, player2Uuid);
-    expect(c).toBe(player2Uuid);
+    await expect(reconnectGmAndServerConfirmEvent(gameMaster, gameMasterUuid)).resolves.toBe(gameMasterUuid);
+    await expect(reconnectPlayerAndServerConfirmEvent(player1, player1Uuid)).resolves.toBe(player1Uuid);
+    await expect(reconnectPlayerAndServerConfirmEvent(player2, player2Uuid)).resolves.toBe(player2Uuid);
 
+    // play a few rounds
+    for (let i = 0; i < 50; i++) {
+        gameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
+        await Promise.all([playerReceivedNextRound(player1), playerReceivedNextRound(player2)]);
+        gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
+        await Promise.all([playerReceivedBuzzerEnabled(player1), playerReceivedBuzzerEnabled(player2)]);
+    }
 
-    // play two rounds
-    gameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
-    await playerReceivedNextRound(player1);
-    await playerReceivedNextRound(player2);
+    expect(GameService.getInstance().gameIdToGameMap.get('abc').playersConnected.length).toBe(2);
 
-    gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
-    await playerReceivedBuzzerEnabled(player1);
-    await playerReceivedBuzzerEnabled(player2);
+    // now just reconnect one player again
+    // and check
+    player1.disconnect();
+    player1.connect();
+
+    await timeoutPromise(10); // time to disconnect on server
+    expect(GameService.getInstance().gameIdToGameMap.get('abc').playersConnected.length).toBe(1);
+
+    await expect(reconnectPlayerAndServerConfirmEvent(player1, player1Uuid)).resolves.toBe(player1Uuid);
+    /*expect(getGame().playersConnected.length).toBe(2);
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socketIoClientId).toBe(player1.id);
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socketIoClientId).toBe(player2.id);*/
+
+    // play another round
+    for (let i = 0; i < 50; i++) {
+        gameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
+        await Promise.all([playerReceivedNextRound(player1), playerReceivedNextRound(player2)]);
+        gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
+        await Promise.all([playerReceivedBuzzerEnabled(player1), playerReceivedBuzzerEnabled(player2)]);
+    }
 });
 
 test('play game with hard reset', async () => {
@@ -158,12 +179,13 @@ test('play game with hard reset', async () => {
     console.log("========================= SERVER CONFIRMS DONE =========================");
 
     newGameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
-    await playerReceivedNextRound(newPlayer1);
-    await playerReceivedNextRound(newPlayer2);
-
+    await Promise.all([playerReceivedNextRound(newPlayer1),  playerReceivedNextRound(newPlayer2)]);
     newGameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
-    await playerReceivedBuzzerEnabled(newPlayer1);
-    await playerReceivedBuzzerEnabled(newPlayer2);
+    await Promise.all([playerReceivedBuzzerEnabled(newPlayer1), playerReceivedBuzzerEnabled(newPlayer2)]);
+    newPlayer1.emit(SocketEventType.PLAYER_BUZZER);
+    newPlayer2.emit(SocketEventType.PLAYER_BUZZER);
+    // two events
+    await Promise.all([gmReceivedBuzzerEvent(newGameMaster), gmReceivedBuzzerEvent(newGameMaster)]);
 
     // clean up
     // remove "disconnected early" listeners
@@ -191,12 +213,13 @@ async function _testPlayRegularGame(): Promise<string[]> {
     await receiveBothPlayerRegisterEvents();
 
     gameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
-    await playerReceivedNextRound(player1);
-    await playerReceivedNextRound(player2);
-
+    await Promise.all([playerReceivedNextRound(player1),  playerReceivedNextRound(player2)]);
     gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
-    await playerReceivedBuzzerEnabled(player1);
-    await playerReceivedBuzzerEnabled(player2);
+    await Promise.all([playerReceivedBuzzerEnabled(player1), playerReceivedBuzzerEnabled(player2)]);
+    player1.emit(SocketEventType.PLAYER_BUZZER);
+    player2.emit(SocketEventType.PLAYER_BUZZER);
+    // two events
+    await Promise.all([gmReceivedBuzzerEvent(gameMaster), gmReceivedBuzzerEvent(gameMaster)]);
 
     return new Promise(resolve => resolve([gameMasterUuid, player1Uuid, player2Uuid]));
 }
@@ -258,13 +281,17 @@ async function receiveBothPlayerRegisterEvents(): Promise<void> {
 
 async function playerReceivedNextRound(player: SocketIOClient.Socket): Promise<void> {
     return new Promise((resolve) => {
-        console.log(`TEST: once GM_START_NEXT_ROUND for socket client id = ${player.id}`);
         player.once(SocketEventType.GM_START_NEXT_ROUND, () => resolve());
     });
 }
 async function playerReceivedBuzzerEnabled(player: SocketIOClient.Socket): Promise<void> {
     return new Promise((resolve) => {
         player.once(SocketEventType.GM_ENABLE_BUZZER, () => resolve());
+    });
+}
+async function gmReceivedBuzzerEvent(gm: SocketIOClient.Socket): Promise<void> {
+    return new Promise((resolve) => {
+        gm.once(SocketEventType.PLAYER_BUZZER, () => resolve());
     });
 }
 async function connectEvent(socket: SocketIOClient.Socket): Promise<void> {
@@ -274,13 +301,6 @@ async function connectEvent(socket: SocketIOClient.Socket): Promise<void> {
         })
     });
 }
-/*async function disconnectEvent(socket: SocketIOClient.Socket): Promise<void> {
-    return new Promise(resolve => {
-        socket.once('disconnect', () => {
-            resolve();
-        })
-    });
-}*/
 async function timeoutPromise(mseconds: number): Promise<void> {
     // a little bit of time so that all requests will be received by the server and we
     // can see the logs
@@ -289,4 +309,6 @@ async function timeoutPromise(mseconds: number): Promise<void> {
     });
 }
 
-
+function getGame(): Game {
+    return GameService.getInstance().gameIdToGameMap.get('abc');
+}
