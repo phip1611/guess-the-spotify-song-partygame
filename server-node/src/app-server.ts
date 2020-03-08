@@ -46,7 +46,10 @@ export class AppServer {
         this.expressApp.use(express.static(AppServer.ANGULAR_DIR));
 
         // ---- SERVE ANGULAR APPLICATION PATHS ---- //
-        this.expressApp.all(['', '*\.', '/spotify-redirect'], (req, res) => {
+
+        // found good solution to allow endpoints we may have but redirect everything to this..
+        // perhaps through order of the statements!
+        this.expressApp.all('*', (req, res) => {
             res.status(200).sendFile(`/`, {root: AppServer.ANGULAR_DIR});
         });
 
@@ -57,7 +60,7 @@ export class AppServer {
         return this.socketIo;
     }
 
-    public setupInfoEndpoint() {
+    /*public setupInfoEndpoint() {
         const endpoint = '/info';
         const gs = GameService.getInstance();
         this.expressApp.get(endpoint, (req: Request, res: Response) => {
@@ -69,7 +72,7 @@ export class AppServer {
                 sockets: Array.from(gs.socketIoClientIdToClientMap.keys())
             });
         });
-    }
+    }*/
 
     public close() {
         this.socketIo.close();

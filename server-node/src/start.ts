@@ -9,4 +9,4 @@ appServer.init(); // #1
 gameService.init(); // #2
 
 // TODO if is debug
-appServer.setupInfoEndpoint();
+// appServer.setupInfoEndpoint();
