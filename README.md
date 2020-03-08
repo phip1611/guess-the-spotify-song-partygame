@@ -41,7 +41,7 @@ of course the selection of a player name.
 # Description of protocol between `game master - server`, `player - server`, and `game master <-via server-> player`.
 (See common-ts/socket-events.ts)
 ## Server
-- listens on all new sockets for either `GM_CREATE_GAME(gameId: string)` or `PLAYER_HELLO(gameId: string)`
+- listens on all new sockets for either `GM_CREATE_GAME(gameId: string)`, `PLAYER_HELLO(gameId: string)`, `PLAYER_RECONNECT(clientUuid: string)`, or `GM_RECONNECT(clientUuid: string)`
 - associates all this sockets a uuid and adds the socket to the sockets of a internal Game-object
 - returns `SERVER_CONFIRM(uuid: string)`
 - this uuid can be used for either `GM_RECONNECT(uuid: string)` or `PLAYER_RECONNECT(uuid: string)` so that
@@ -50,12 +50,12 @@ of course the selection of a player name.
 - forward GM to Player: `GM_ENABLE_BUZZER()`, `GM_START_NEXT_ROUND
 - forward Player to GM: `PLAYER_REGISTER(userName: string)`, `PLAYER_BUZZER()`
 ## Game master
-- Sends event `GM_CREATE_GAME(gameId: string)` and receives `SERVER_CONFIRM(uuid: string)`
-- or sends `GM_RECONNECT(uuid: string)` and receives `SERVER_CONFIRM(uuid: string)`
+- Sends event `GM_CREATE_GAME(gameId: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
+- or sends `GM_RECONNECT(clientUuid: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
 ---
 - sends `GM_START_NEXT_ROUND()`, `GM_ENABLE_BUZZER()` ...
 ## Player
-- Sends event `PLAYER_HELLO(gameId: string)` and receives `SERVER_CONFIRM(uuid: string)`
-- or sends `PLAYER_RECONNECT(uuid: string)` and receives `SERVER_CONFIRM(uuid: string)`
+- Sends event `PLAYER_HELLO(gameId: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
+- or sends `PLAYER_RECONNECT(clientUuid: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
 - if not done yet: sends `PLAYER_REGISTER(userName: string)` to game master
 - send `PLAYER_BUZZER()` again and again..
