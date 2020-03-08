@@ -46,7 +46,7 @@ export class AppServer {
         this.expressApp.use(express.static(AppServer.ANGULAR_DIR));
 
         // ---- SERVE ANGULAR APPLICATION PATHS ---- //
-        this.expressApp.all(['', '*\.'], (req, res) => {
+        this.expressApp.all(['', '*\.', '/spotify-redirect'], (req, res) => {
             res.status(200).sendFile(`/`, {root: AppServer.ANGULAR_DIR});
         });
 

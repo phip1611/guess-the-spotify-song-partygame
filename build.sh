@@ -13,8 +13,11 @@ yarn run build
 cd ..
 
 rm -rf server-node/build
-mkdir server-node/build
-cp -r ui/dist/song-game server-node/build/public
+
+# this is necessary because of e7446021 ... this is ugly :/
+mkdir -p                    server-node/build/server-node/src/
+cp -r ui/dist/song-game     server-node/build/server-node/src/public
+# yarn install will happen here
 cp server-node/package.json server-node/build/package.json
 cp server-node/package.json server-node/build/yarn.lock
 
