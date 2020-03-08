@@ -95,6 +95,16 @@ test('play game with soft reset', async () => {
     expect(b).toBe(player1Uuid);
     const c = await reconnectPlayerAndServerConfirmEvent(player2, player2Uuid);
     expect(c).toBe(player2Uuid);
+
+
+    // play two rounds
+    gameMaster.emit(SocketEventType.GM_START_NEXT_ROUND);
+    await playerReceivedNextRound(player1);
+    await playerReceivedNextRound(player2);
+
+    gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
+    await playerReceivedBuzzerEnabled(player1);
+    await playerReceivedBuzzerEnabled(player2);
 });
 
 test('play game with hard reset', async () => {

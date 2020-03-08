@@ -311,5 +311,6 @@ export class GameService {
     reset() {
         this._gameIdToGameMap.clear();
         this._clientUuidToGameIdMap.clear();
+        this._socketIoClientIdToClientMap.clear();
     }
 }
