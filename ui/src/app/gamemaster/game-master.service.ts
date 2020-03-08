@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Log } from 'ng-log';
+import { CommonClientService } from '../common/common-client.service';
 
 export type PointsPerPlayerType = { playerName: string; points: number }[];
 
@@ -16,13 +17,11 @@ export class GameMasterService {
 
   private pointsPerPlayer: PointsPerPlayerType = [];
 
-  private gameId: string;
-
   private round: number;
 
   private totalRounds: number;
 
-  constructor() {
+  constructor(private clientService: CommonClientService) {
   }
 
   /**
@@ -30,7 +29,7 @@ export class GameMasterService {
    * for the game in this service.
    */
   createGame(songs: any[]) {
-    this.gameId = GameMasterService.generateGameId();
+    this.clientService.gameId = GameMasterService.generateGameId();
     this.songsAvailable = songs;
     this.round = 0;
     this.totalRounds = songs.length;
@@ -70,7 +69,7 @@ export class GameMasterService {
   }
 
   getGameId(): string {
-    return this.gameId;
+    return this.clientService.gameId;
   }
 
   getPointsPerPlayer(): PointsPerPlayerType {

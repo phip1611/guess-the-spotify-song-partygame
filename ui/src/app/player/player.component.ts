@@ -29,6 +29,8 @@ export class PlayerComponent implements OnInit {
   ngOnInit(): void {
     const gameId = this.route.snapshot.paramMap.get('id');
     if (gameId) {
+      this.clientService.playerType = 'player';
+
       // let server know we can listen
       this.clientService.gameId = gameId;
       this.socketService.sendMessage({

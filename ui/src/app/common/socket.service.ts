@@ -16,8 +16,8 @@ export class SocketService {
 
   constructor(private socket: AppSocket,
               private clientService: CommonClientService) {
-    socket.on('disconnect', () => {
-      SocketService.LOGGER.warn('disconnect occurred');
+    socket.on('disconnect', (reason) => {
+      SocketService.LOGGER.warn('disconnect occurred: reason = ' + reason);
       socket.connect();
       if (this.clientService.clientUuid) {
         SocketService.LOGGER.info('tries to reconnect');
@@ -34,7 +34,11 @@ export class SocketService {
           } else {
             SocketService.LOGGER.info('reconnect successful');
           }
+        }, error => {
+          throw new Error(`Server couldn't confirm our reconnect attempt! Server gone? - ` + error.toString());
         });
+      } else {
+        SocketService.LOGGER.error('client uuid is null! can\'r rejoin any game!');
       }
     });
   }
@@ -44,7 +48,7 @@ export class SocketService {
   }
 
   sendMessage(event: SocketEvent): void {
-    SocketService.LOGGER.debug('send message through socket!');
+    SocketService.LOGGER.debug(`sent message through socket! ${event.type}(${event.payload})`);
     this.socket.emit(event.type, event.payload);
   }
 

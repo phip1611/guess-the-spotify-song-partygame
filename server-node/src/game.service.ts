@@ -189,6 +189,9 @@ export class GameService {
         if (!game) {
             // we create the game if its a GM_CREATE_GAME event
             if (type === SocketEventType.GM_CREATE_GAME) {
+                if (!gameId) {
+                    throw new Error(`Can't create a game with ID null!`);
+                }
                 game = new Game(gameId, client);
                 this._gameIdToGameMap.set(gameId, game);
             } else {
@@ -201,9 +204,9 @@ export class GameService {
         try {
             game.connectClient(client);
         } catch (e) {
-            Log.error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${JSON.stringify(game.toPrintable())}`);
+            Log.error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
             Log.error(e);
-            throw new Error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${JSON.stringify(game.toPrintable())}`);
+            throw new Error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
         }
 
 

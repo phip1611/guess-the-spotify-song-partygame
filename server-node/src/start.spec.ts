@@ -56,11 +56,30 @@ afterAll(() => {
 });
 
 test('play game regular', async () => {
-    await _testPlayRegularGameAndDisconnect();
+    await _testPlayRegularGame();
+
+    // check state on server
+    gameMaster.disconnect();
+    player1.disconnect();
+    player2.disconnect();
+
+    // make sure disconnects reach server
+    await timeoutPromise(100);
+
+    const games = Array.from(GameService.getInstance().gameIdToGameMap.values());
+    games.forEach(game => {
+        expect(game.gameMaster.dead).toBeTruthy();
+        game.players.forEach(p => expect(p.dead).toBeTruthy)
+    });
+
+    expect(GameService.getInstance().socketIoClientIdToClientMap.size).toBe(0);
+
+    // NOW! This has to be stay on the server! to make reconnects possible
+    // expect(GameService.getInstance().clientUuidToGameIdMap.size).toBe(0);
 });
 
 test('play game with soft reset', async () => {
-    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGameAndDisconnect();
+    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGame();
 
     gameMaster.disconnect();
     player1.disconnect();
@@ -79,7 +98,7 @@ test('play game with soft reset', async () => {
 });
 
 test('play game with hard reset', async () => {
-    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGameAndDisconnect();
+    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGame();
 
     console.log("======================= _testPlayRegularGame done ===========================");
 
@@ -144,7 +163,7 @@ test('play game with hard reset', async () => {
 
 });
 
-async function _testPlayRegularGameAndDisconnect(): Promise<string[]> {
+async function _testPlayRegularGame(): Promise<string[]> {
     let gameMasterUuid, player1Uuid, player2Uuid;
     gameMasterUuid = await gmCreateGameAndServerConfirmEvent();
     player1Uuid = await player1HelloAndServerConfirmEvent();
@@ -168,25 +187,6 @@ async function _testPlayRegularGameAndDisconnect(): Promise<string[]> {
     gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
     await playerReceivedBuzzerEnabled(player1);
     await playerReceivedBuzzerEnabled(player2);
-
-    // check state on server
-    gameMaster.disconnect();
-    player1.disconnect();
-    player2.disconnect();
-
-    // make sure disconnects reach server
-    await timeoutPromise(100);
-
-    const games = Array.from(GameService.getInstance().gameIdToGameMap.values());
-    games.forEach(game => {
-        expect(game.gameMaster.dead).toBeTruthy();
-        game.players.forEach(p => expect(p.dead).toBeTruthy)
-    });
-
-    expect(GameService.getInstance().socketIoClientIdToClientMap.size).toBe(0);
-
-    // NOW! This has to be stay on the server! to make reconnects possible
-    // expect(GameService.getInstance().clientUuidToGameIdMap.size).toBe(0);
 
     return new Promise(resolve => resolve([gameMasterUuid, player1Uuid, player2Uuid]));
 }

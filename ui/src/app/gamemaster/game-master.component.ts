@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
+import { CommonClientService } from '../common/common-client.service';
 
 @Component({
   selector: 'app-game-master',
@@ -21,10 +22,11 @@ export class GameMasterComponent implements OnInit, OnDestroy {
 
   public state: GameMasterState = GameMasterState.CREATE_GAME;
 
-  constructor(private socketService: SocketService) {
+  constructor(private clientService: CommonClientService) {
   }
 
   ngOnInit(): void {
+    this.clientService.playerType = 'gameMaster';
   }
 
   ngOnDestroy(): void {
