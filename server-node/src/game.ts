@@ -1,4 +1,5 @@
 import { Client, ClientType } from './client';
+import { Log } from './log';
 
 export type GameId = string;
 
@@ -51,6 +52,7 @@ export class Game {
             if (this._gameMaster && this._gameMaster.uuid != client.uuid) {
                 throw new Error('New game master has different client uuid!');
             }
+            Log.log(`Game#connectClient: new game master set; ${JSON.stringify(client.toPrintable())}`);
             this._gameMaster = client;
         } else {
             const index = this._players.findIndex(p => p.uuid === client.uuid);
@@ -61,6 +63,7 @@ export class Game {
                 }
                 this._players.splice(index, 1);
             }
+            Log.log(`Game#connectClient: added player; ${JSON.stringify(client.toPrintable())}`);
             this._players.push(client);
         }
 
