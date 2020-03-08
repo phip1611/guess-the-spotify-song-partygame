@@ -32,8 +32,6 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
   private subs1: Subscription;
   private subs2: Subscription;
 
-  private tmp = false;
-
   constructor(private socketService: SocketService,
               private socket: AppSocket,
               private playerService: PlayerService) {
@@ -42,10 +40,6 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subs1 = this.socketService.getBuzzerEnabled().subscribe(() => {
       this.buzzerEnabled = true;
-      if (!this.tmp) {
-        this.tmp = true;
-        this.socket.disconnect(false);
-      }
     });
     this.subs2 = this.socketService.getNextRoundStarted().subscribe(() => {
       this.buzzerEnabled = false;
