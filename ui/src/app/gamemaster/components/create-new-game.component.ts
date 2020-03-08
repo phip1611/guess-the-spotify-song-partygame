@@ -4,6 +4,7 @@ import { SpotifyApiService } from '../../common/spotify-api.service';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
   selector: 'app-gm-create-new-game',
@@ -54,6 +55,7 @@ export class CreateNewGameComponent implements OnInit {
   done = new EventEmitter();
 
   constructor(public spotifyService: SpotifyApiService,
+              private clientService: CommonClientService,
               private gameMasterService: GameMasterService,
               private fb: FormBuilder) {
   }

@@ -1,6 +1,12 @@
 import { AppServer } from './app-server';
 import { GameService } from './game.service';
 
+const appServer = AppServer.getInstance();
+const gameService = GameService.getInstance();
+
 // order is important!
-AppServer.init(); // #1
-GameService.init(); // #2
+appServer.init(); // #1
+gameService.init(); // #2
+
+// TODO if is debug
+appServer.setupInfoEndpoint();

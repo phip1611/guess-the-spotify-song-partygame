@@ -13,13 +13,16 @@
     "types": [
       "node",
       "socket.io",
-      "express"
+      "socket.io-client",
+      "express",
+      "jest"
     ],
     "typeRoots": [
       "node_modules/@types"
     ]
   },
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
+    "../common-ts/**/*.ts"
   ]
 }

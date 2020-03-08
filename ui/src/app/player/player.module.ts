@@ -3,6 +3,7 @@ import { AppCommonModule } from '../common/app-common.module';
 import { PlayerComponent } from './player.component';
 import { PlayerJoinGameComponent } from './components/player-join-game.component';
 import { PlayerInGameComponent } from './components/player-in-game.component';
+import { PlayerService } from './player.service';
 
 
 @NgModule({
@@ -14,7 +15,9 @@ import { PlayerInGameComponent } from './components/player-in-game.component';
   imports: [
     AppCommonModule
   ],
-  providers: [],
+  providers: [
+    PlayerService
+  ],
 })
 export class PlayerModule {
 }

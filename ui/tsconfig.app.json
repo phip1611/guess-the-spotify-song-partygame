@@ -2,14 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [],
+    "paths": {
+      // https://stackoverflow.com/questions/58259660/how-to-avoid-module-not-found-error-cant-resolve-tslib-error-when-referen
+      "tslib": ["node_modules/tslib"]
+    }
   },
   "files": [
     "src/main.ts",
     "src/polyfills.ts"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../common-ts/**/*.ts"
   ],
   "exclude": [
     "src/test.ts",

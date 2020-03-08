@@ -3,8 +3,9 @@ import { Log } from 'ng-log';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
-import { SocketEventType } from '../../common/model/socket-events';
 import { JOIN_GAME_URL } from '../../common/config/urls';
+import { SocketEventType } from '../../../../../common-ts/socket-events';
+import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
   selector: 'app-gm-show-link',
@@ -47,7 +48,8 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   constructor(private gameMasterService: GameMasterService,
-              private socketService: SocketService) {
+              private socketService: SocketService,
+              private clientService: CommonClientService) {
     this.joinGameUrl = JOIN_GAME_URL + '/' + gameMasterService.getGameId();
   }
 
@@ -57,6 +59,11 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
     this.socketService.sendMessage({
       payload: this.gameMasterService.getGameId(),
       type: SocketEventType.GM_CREATE_GAME
+    });
+
+    this.socketService.getServerConfirm().subscribe(uuid => {
+      this.clientService.clientUuid = uuid;
+      ShowLinkComponent.LOGGER.info('GM_CREATE_GAME von Server bestätigt');
     });
 
     this.subscription = this.socketService.getPlayerRegistered().subscribe(playerId => {

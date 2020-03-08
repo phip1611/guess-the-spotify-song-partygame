@@ -8,6 +8,7 @@ import { InGameComponent } from './components/in-game.component';
 import { SpotifySongcardComponent } from './components/sub/spotify-songcard.component';
 import { PlayerPointsComponent } from './components/sub/player-points.component';
 import { PlayerBuzzerTimesComponent } from './components/sub/player-buzzer-times.component';
+import { GameMasterService } from './game-master.service';
 
 
 @NgModule({
@@ -24,7 +25,9 @@ import { PlayerBuzzerTimesComponent } from './components/sub/player-buzzer-times
   imports: [
     AppCommonModule
   ],
-  providers: []
+  providers: [
+    GameMasterService
+  ]
 })
 export class GameMasterModule {
 }

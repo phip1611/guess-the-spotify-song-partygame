@@ -10,9 +10,9 @@ import { SOCKET_URL } from './config/urls';
 @Injectable({
   providedIn: 'root'
 })
-export class SocketProvider extends Socket {
+export class AppSocket extends Socket {
 
-  private static readonly LOGGER = new Log(SocketProvider.name);
+  private static readonly LOGGER = new Log(AppSocket.name);
 
   constructor() {
     // instead of forRoot we do this
