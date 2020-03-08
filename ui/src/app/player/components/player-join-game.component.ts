@@ -3,7 +3,7 @@ import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
-import { PlayerService } from '../player-master.service';
+import { PlayerService } from '../player.service';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 
 @Component({

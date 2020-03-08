@@ -94,13 +94,12 @@ export class GameService {
             this.addPlayerToGame(SocketEventType.PLAYER_RECONNECT, socket, null, uuid);
         });
 
-        socket.on('reconnect', () => {
-            console.info('A socket reconnected');
-        });
-
         // socket.on('disconnect', reason => {
         socket.once('disconnect', reason => {
-            console.info('A socket disconnected: ' + reason);
+            const a = this.clientMap.get(socket.client.id);
+            const b = a ? this.games.get(a).id : null;
+            const c = b ? `; gameId='${a}'}` : '';
+            console.info(`Server: A socket disconnected: ${reason}; socketIoClientId='${socket.client.id}'${c}`);
         });
     }
 
@@ -170,6 +169,8 @@ export class GameService {
             if (clientUuid) {
                 this.clientMap.delete(clientUuid);
             }
+
+            return;
         }
 
         // be aware: clientUuid can be null! therefore we could get a new client uuid here for the client object
@@ -182,8 +183,6 @@ export class GameService {
             game.addPlayer(client); // add new object to game
 
             Log.reconnectedClientToGame(type, gameId, clientUuid, client.socketIoClientId,'player');
-
-            console.dir(game.toPrintable())
         } else {
             clientUuid = client.uuid; // if clientUuid was previously null
 

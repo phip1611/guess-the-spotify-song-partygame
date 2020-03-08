@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
 import { ActivatedRoute } from '@angular/router';
-import { PlayerService } from './player-master.service';
 import { SocketEventType } from '../../../../common-ts/socket-events';
+import { CommonClientService } from '../common/common-client.service';
 
 @Component({
   selector: 'app-player',
@@ -23,17 +23,21 @@ export class PlayerComponent implements OnInit {
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute,
-              private playerService: PlayerService) {
+              private clientService: CommonClientService) {
   }
 
   ngOnInit(): void {
     const gameId = this.route.snapshot.paramMap.get('id');
     if (gameId) {
       // let server know we can listen
-      this.playerService.setGameId(gameId);
+      this.clientService.gameId = gameId;
       this.socketService.sendMessage({
         payload: gameId,
         type: SocketEventType.PLAYER_HELLO
+      });
+      this.socketService.getServerConfirm().subscribe(uuid => {
+        this.clientService.clientUuid = uuid;
+        PlayerComponent.LOGGER.info('PLAYER_HELLO von Server bestätigt');
       });
     }
   }

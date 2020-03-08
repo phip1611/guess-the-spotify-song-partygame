@@ -3,9 +3,7 @@ import { Log } from 'ng-log';
 
 export type PointsPerPlayerType = { playerName: string; points: number }[];
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class GameMasterService {
 
   private static readonly LOGGER = new Log(GameMasterService.name);
