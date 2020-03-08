@@ -3,8 +3,8 @@ import { Socket } from 'socket.io';
 import { AppServer } from './app-server';
 import { Game } from './game';
 import { GmCreateGamePayload, GmReconnectPayload, PlayerBuzzerPayload, PlayerHelloPayload, PlayerReconnectPayload, PlayerRegisterPayload, SocketEventType } from '../../common-ts/socket-events';
-import { Client } from './client';
 import { Log } from './log';
+import { Client, ClientType } from './client';
 
 /**
  * The game service only manages the communication between
@@ -16,7 +16,10 @@ export class GameService {
 
     private static instance: GameService;
 
-    private _games: Map<string, Game> = new Map<string, Game>();
+    /**
+     * Map of all active gameIdToGameMap. Map from game id to game.
+     */
+    private _gameIdToGameMap: Map<string, Game> = new Map<string, Game>();
 
     /**
      * This map helps us to manage reconnects. Once a client wants to reconnect we can lookup
@@ -25,7 +28,15 @@ export class GameService {
      * Key: clientUuid
      * Value: GameID
      */
-    private _clientMap: Map<string, string> = new Map<string, string>();
+    private _clientUuidToGameIdMap: Map<string, string> = new Map<string, string>();
+
+    /**
+     * This map is a mapping from socketIoClientId to client.
+     *
+     * Key: socketIoClientId
+     * Value: Client
+     */
+    private _socketIoClientIdToClientMap: Map<string, Client> = new Map<string, Client>();
 
     private initDone: boolean = false;
 
@@ -45,7 +56,7 @@ export class GameService {
         }
 
         AppServer.getInstance().getSocketIo().on('connect', (socket => {
-            console.log(`client connected; socket io client id is '${socket.client.id}'`);
+            Log.log(`client connected; socket io client id is '${socket.client.id}'`);
             this.setUpSocketEventsHandler(socket);
         }));
 
@@ -66,7 +77,14 @@ export class GameService {
          */
         socket.on(SocketEventType.GM_CREATE_GAME, (gameId: GmCreateGamePayload) => {
             Log.eventReceived(SocketEventType.GM_CREATE_GAME, socket.client.id, gameId);
-            this.addGameMasterToGame(SocketEventType.GM_CREATE_GAME, socket, gameId, null);
+
+            try {
+                this.addClientToGame(SocketEventType.GM_CREATE_GAME, socket, gameId, ClientType.GAME_MASTER);
+            } catch (e) {
+                Log.error(e);
+            }
+
+            this.setUpForwardGmSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -75,7 +93,14 @@ export class GameService {
          */
         socket.on(SocketEventType.PLAYER_HELLO, (gameId: PlayerHelloPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_HELLO, socket.client.id, gameId);
-            this.addPlayerToGame(SocketEventType.PLAYER_HELLO, socket, gameId, null);
+
+            try {
+                this.addClientToGame(SocketEventType.PLAYER_HELLO, socket, gameId, ClientType.PLAYER);
+            } catch (e) {
+                Log.error(e);
+            }
+
+            this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -83,7 +108,15 @@ export class GameService {
          */
         socket.on(SocketEventType.GM_RECONNECT, (uuid: GmReconnectPayload) => {
             Log.eventReceived(SocketEventType.GM_RECONNECT, socket.client.id, uuid);
-            this.addGameMasterToGame(SocketEventType.GM_RECONNECT, socket, null, uuid);
+
+            let gameId;
+            try {
+                gameId = this.addClientToGame(SocketEventType.GM_RECONNECT, socket, uuid, ClientType.GAME_MASTER);
+            } catch (e) {
+                Log.error(e);
+            }
+
+            this.setUpForwardGmSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -91,112 +124,99 @@ export class GameService {
          */
         socket.on(SocketEventType.PLAYER_RECONNECT, (uuid: PlayerReconnectPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_RECONNECT, socket.client.id, uuid);
-            this.addPlayerToGame(SocketEventType.PLAYER_RECONNECT, socket, null, uuid);
+
+            let gameId;
+            try {
+                gameId = this.addClientToGame(SocketEventType.PLAYER_RECONNECT, socket, uuid, ClientType.PLAYER);
+            } catch (e) {
+                Log.error(e);
+            }
+
+            this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
         });
 
         // socket.on('disconnect', reason => {
         socket.once('disconnect', reason => {
-            const a = this.clientMap.get(socket.client.id);
-            const b = a ? this.games.get(a).id : null;
-            const c = b ? `; gameId='${a}'}` : '';
-            console.info(`Server: A socket disconnected: ${reason}; socketIoClientId='${socket.client.id}'${c}`);
+            Log.info(`A socket disconnected: ${reason}`);
+            const client = this._socketIoClientIdToClientMap.get(socket.client.id);
+            if (!client) return;
+
+            // this is all we need to do here
+            // remove the "socket" object inside client / make it null
+            client.disconnect();
+
+            // NO! this._clientUuidToGameIdMap.delete(client.uuid);
+            this._socketIoClientIdToClientMap.delete(socket.client.id);
         });
     }
 
-    private addGameMasterToGame(type: SocketEventType, socket: Socket, gameId: string, clientUuid: string) {
-        if (clientUuid) {
-            // we want to reconnect
-            gameId = this.clientMap.get(clientUuid);
-            if (!gameId) {
-                Log.invalidClientUuid(type);
-                return;
+    /**
+     * Adds a player to the game. First checks if the game exists. Then connects.
+     * Returns the id of the game.
+     *
+     * @param type
+     * @param socket
+     * @param id Either game id or client uuid (depending on type)
+     * @param clientType
+     * @return id of game
+     */
+    private addClientToGame(type: SocketEventType, socket: Socket, id: string, clientType: ClientType): string {
+        const isReconnect = type === SocketEventType.GM_RECONNECT || type === SocketEventType.PLAYER_RECONNECT;
+
+        let clientUuid = null;
+        let gameId = null;
+
+        if (isReconnect) {
+            // id is clientUuid
+            clientUuid = id;
+
+            if (!this._clientUuidToGameIdMap.has(clientUuid)) {
+                Log.error(`Unknown client uuid ${clientUuid}!`);
+                throw new Error(`Unknown client uuid ${clientUuid}!`);
             }
-        }
 
-        if (!gameId) {
-            Log.invalidGameId(type);
-            return;
-        }
-
-        let game = this.games.get(gameId);
-        if (!game && clientUuid) { // tried to reconnect to an (now) invalid game
-            Log.invalidGame(type, gameId);
-            this.clientMap.delete(clientUuid);
-        }
-
-
-        // be aware: clientUuid can be null! therefore we could get a new client uuid here for the client object
-        // otherwise we have a new uuid
-        const client = new Client(socket, clientUuid);
-        clientUuid = client.uuid; // if clientUuid was previously null
-
-        if (game && clientUuid) {
-            // reconnect; just set new game master
-            game.gameMaster = client;
-            Log.reconnectedClientToGame(type, gameId, clientUuid, client.socketIoClientId, 'gameMaster');
+            gameId = this._clientUuidToGameIdMap.get(clientUuid);
         } else {
-            game = new Game(gameId, client);
-            Log.addedClientToGame(type, gameId, clientUuid, client.socketIoClientId, 'gameMaster');
-            this.clientMap.set(clientUuid, gameId);
-            this.games.set(gameId, game);
+            gameId = id;
         }
 
-        Log.eventSent(SocketEventType.SERVER_CONFIRM, gameId, clientUuid, client.socketIoClientId, clientUuid);
+        // if clientUuid is still null we get a new one
+        const client = new Client(socket, clientType, clientUuid);
+        clientUuid = client.uuid; // make sure this var has the latest value
 
-        socket.emit(SocketEventType.SERVER_CONFIRM, clientUuid);
-        this.setUpGmForwardSocketEventsHandler(socket, game.id);
-    }
 
-    private addPlayerToGame(type: SocketEventType, socket: Socket, gameId: string | null, clientUuid: string | null) {
-        if (clientUuid) {
-            // we want to reconnect
-            gameId = this.clientMap.get(clientUuid);
-            if (!gameId) {
-                Log.invalidClientUuid(type);
-                return;
-            }
-        }
-
-        if (!gameId) {
-            Log.invalidGameId(type);
-            return;
-        }
-
-        const game = this.games.get(gameId);
+        let game = this._gameIdToGameMap.get(gameId);
         if (!game) {
-            Log.invalidGame(type, gameId);
-
-            if (clientUuid) {
-                this.clientMap.delete(clientUuid);
+            // we create the game if its a GM_CREATE_GAME event
+            if (type === SocketEventType.GM_CREATE_GAME) {
+                game = new Game(gameId, client);
+                this._gameIdToGameMap.set(gameId, game);
+            } else {
+                throw new Error(`Game with ${gameId} doesn't exist!`);
             }
-
-            return;
         }
 
-        // be aware: clientUuid can be null! therefore we could get a new client uuid here for the client object
-        // otherwise we have a new uuid
-        const client = new Client(socket, clientUuid);
-
-        if (client.uuid === clientUuid) {
-            // client already defined; we do a reconnect
-            game.removePlayer(clientUuid); // remove old object from game
-            game.addPlayer(client); // add new object to game
-
-            Log.reconnectedClientToGame(type, gameId, clientUuid, client.socketIoClientId,'player');
-        } else {
-            clientUuid = client.uuid; // if clientUuid was previously null
-
-            // add new client to game
-            game.addPlayer(client);
-            Log.addedClientToGame(type, gameId, clientUuid, client.socketIoClientId, 'player');
-            this.clientMap.set(clientUuid, gameId);
+        // now we know game, client and socket are valid
+        // game.connectClient does the rest
+        try {
+            game.connectClient(client);
+        } catch (e) {
+            Log.error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${JSON.stringify(game.toPrintable())}`);
+            Log.error(e);
+            throw new Error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${JSON.stringify(game.toPrintable())}`);
         }
 
-        socket.emit(SocketEventType.SERVER_CONFIRM, clientUuid);
+
+        this._socketIoClientIdToClientMap.set(client.socketIoClientId, client);
+        this._clientUuidToGameIdMap.set(client.uuid, gameId);
 
         Log.eventSent(SocketEventType.SERVER_CONFIRM, gameId, clientUuid, client.socketIoClientId, clientUuid);
-        this.setUpForwardPlayerSocketEventsHandler(socket, game.id);
+        socket.emit(SocketEventType.SERVER_CONFIRM, clientUuid);
+
+        return gameId;
     }
+
+
 
     /**
      * Set up all socket listeners for game master events.
@@ -204,18 +224,18 @@ export class GameService {
      * In principle all of these events will be broadcasted
      * to all players of the game.
      */
-    private setUpGmForwardSocketEventsHandler(socket: SocketIO.Socket, gameId: string) {
+    private setUpForwardGmSocketEventsHandler(socket: SocketIO.Socket, gameId: string) {
 
         socket.on(SocketEventType.GM_START_NEXT_ROUND, () => {
             Log.eventReceived(SocketEventType.GM_START_NEXT_ROUND, socket.client.id);
-            const game = this.games.get(gameId); // get the latest object
-            game.players.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_START_NEXT_ROUND));
+            const game = this.gameIdToGameMap.get(gameId); // get the latest object
+            game.playersConnected.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_START_NEXT_ROUND));
         });
 
         socket.on(SocketEventType.GM_ENABLE_BUZZER, () => {
             Log.eventReceived(SocketEventType.GM_ENABLE_BUZZER, socket.client.id);
-            const game = this.games.get(gameId); // get the latest object
-            game.players.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_ENABLE_BUZZER));
+            const game = this.gameIdToGameMap.get(gameId); // get the latest object
+            game.playersConnected.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_ENABLE_BUZZER));
         });
     }
 
@@ -228,14 +248,14 @@ export class GameService {
     private setUpForwardPlayerSocketEventsHandler(socket: SocketIO.Socket, gameId: string) {
         socket.on(SocketEventType.PLAYER_REGISTER, (playerName: PlayerRegisterPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_REGISTER, socket.client.id, playerName);
-            const game = this.games.get(gameId); // get the latest object
+            const game = this.gameIdToGameMap.get(gameId); // get the latest object
             game.gameMaster.socket.emit(SocketEventType.PLAYER_REGISTER, playerName);
         });
 
         // a player hits the buzzer, let the game master now it
         socket.on(SocketEventType.PLAYER_BUZZER, (playerName: PlayerBuzzerPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_BUZZER, socket.client.id, playerName);
-            const game = this.games.get(gameId); // get the latest object
+            const game = this.gameIdToGameMap.get(gameId); // get the latest object
             game.gameMaster.socket.emit(SocketEventType.PLAYER_BUZZER, playerName);
         });
     }
@@ -246,37 +266,47 @@ export class GameService {
         setInterval(() => this.removalOfOldGames(that), limit)
     }
 
-    private removalOfOldGames(context: any) {
-        console.log('removing old games now');
-        if (context._games.size === 0) { return; }
+    private removalOfOldGames(context: GameService) {
+        Log.log('removing old gameIdToGameMap now');
+        if (context.gameIdToGameMap.size === 0) { return; }
         const limit = 1000 * 60 * 60 * 2; // two hours in milli seconds
         const currentTime = new Date().getTime();
         const idsToRemove = [];
-        context._games.forEach((game) => {
+
+        Array.from(context.gameIdToGameMap.values()).forEach((game) => {
             if (currentTime - game.started.getTime() > limit) {
-                console.log(`removing game '${game.id}'`);
+                Log.log(`removing game '${game.id}'`);
                 idsToRemove.push(game.id);
             }
         });
+
         idsToRemove.forEach(id => {
-            const game = context._games.get(id);
+            const game = context.gameIdToGameMap.get(id);
             game.gameMaster.socket.disconnect(true);
-            game.players.map(p => p.socket).forEach(s => s.disconnect(true));
-            context._games.delete(id)
+            context.clientUuidToGameIdMap.delete(game.gameMaster.uuid);
+            game.players.forEach(p => {
+                p.disconnect();
+                context.clientUuidToGameIdMap.delete(p.uuid);
+            });
+            context.gameIdToGameMap.delete(id);
         });
     }
 
 
-    get games(): Map<string, Game> {
-        return this._games;
+    get gameIdToGameMap(): Map<string, Game> {
+        return this._gameIdToGameMap;
     }
 
-    get clientMap(): Map<string, string> {
-        return this._clientMap;
+    get clientUuidToGameIdMap(): Map<string, string> {
+        return this._clientUuidToGameIdMap;
+    }
+
+    get socketIoClientIdToClientMap(): Map<string, Client> {
+        return this._socketIoClientIdToClientMap;
     }
 
     reset() {
-        this._games.clear();
-        this._clientMap.clear();
+        this._gameIdToGameMap.clear();
+        this._clientUuidToGameIdMap.clear();
     }
 }

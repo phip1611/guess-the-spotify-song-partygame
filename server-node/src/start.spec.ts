@@ -3,17 +3,6 @@ import { SocketEventType } from '../../common-ts/socket-events';
 import { AppServer } from './app-server';
 import { GameService } from './game.service';
 
-
-/*
-  Its "okay" if these tests fail from time to time! I'm not 100% sure why;
-  I think its because there is no guarantee that events are sent
-
-  I never experienced this in my "real world testing", only here in the testing suite..
-
-  therefore I assume it might be okay.. so if this tests works from "time to time"
-  it should show that the logic works... despite the networking problems..
- */
-
 const TEST_PORT = 63246;
 
 beforeAll(() => {
@@ -67,11 +56,11 @@ afterAll(() => {
 });
 
 test('play game regular', async () => {
-    await _testPlayRegularGame();
+    await _testPlayRegularGameAndDisconnect();
 });
 
 test('play game with soft reset', async () => {
-    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGame();
+    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGameAndDisconnect();
 
     gameMaster.disconnect();
     player1.disconnect();
@@ -90,7 +79,7 @@ test('play game with soft reset', async () => {
 });
 
 test('play game with hard reset', async () => {
-    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGame();
+    const [gameMasterUuid, player1Uuid, player2Uuid] = await _testPlayRegularGameAndDisconnect();
 
     console.log("======================= _testPlayRegularGame done ===========================");
 
@@ -155,7 +144,7 @@ test('play game with hard reset', async () => {
 
 });
 
-async function _testPlayRegularGame(): Promise<string[]> {
+async function _testPlayRegularGameAndDisconnect(): Promise<string[]> {
     let gameMasterUuid, player1Uuid, player2Uuid;
     gameMasterUuid = await gmCreateGameAndServerConfirmEvent();
     player1Uuid = await player1HelloAndServerConfirmEvent();
@@ -179,6 +168,26 @@ async function _testPlayRegularGame(): Promise<string[]> {
     gameMaster.emit(SocketEventType.GM_ENABLE_BUZZER);
     await playerReceivedBuzzerEnabled(player1);
     await playerReceivedBuzzerEnabled(player2);
+
+    // check state on server
+    gameMaster.disconnect();
+    player1.disconnect();
+    player2.disconnect();
+
+    // make sure disconnects reach server
+    await timeoutPromise(100);
+
+    const games = Array.from(GameService.getInstance().gameIdToGameMap.values());
+    games.forEach(game => {
+        expect(game.gameMaster.dead).toBeTruthy();
+        game.players.forEach(p => expect(p.dead).toBeTruthy)
+    });
+
+    expect(GameService.getInstance().socketIoClientIdToClientMap.size).toBe(0);
+
+    // NOW! This has to be stay on the server! to make reconnects possible
+    // expect(GameService.getInstance().clientUuidToGameIdMap.size).toBe(0);
+
     return new Promise(resolve => resolve([gameMasterUuid, player1Uuid, player2Uuid]));
 }
 
@@ -255,6 +264,13 @@ async function connectEvent(socket: SocketIOClient.Socket): Promise<void> {
         })
     });
 }
+/*async function disconnectEvent(socket: SocketIOClient.Socket): Promise<void> {
+    return new Promise(resolve => {
+        socket.once('disconnect', () => {
+            resolve();
+        })
+    });
+}*/
 async function timeoutPromise(mseconds: number): Promise<void> {
     // a little bit of time so that all requests will be received by the server and we
     // can see the logs

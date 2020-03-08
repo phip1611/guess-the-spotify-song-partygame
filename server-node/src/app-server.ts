@@ -63,14 +63,11 @@ export class AppServer {
         this.expressApp.get(endpoint, (req: Request, res: Response) => {
             res.setHeader('Content-type', 'application/json');
 
-            const games = Array.from(gs.games.values()).map(g => {
-                return {
-                    id: g.id,
-                    players: g.players.map(p => p.uuid),
-                    gameMaster: g.gameMaster.uuid
-                }
+            const games = Array.from(gs.gameIdToGameMap.values()).map(g => g.toPrintable());
+            return res.send({
+                games: games,
+                sockets: Array.from(gs.socketIoClientIdToClientMap.keys())
             });
-            return res.send(games);
         });
     }
 

@@ -1,37 +1,39 @@
 import { SocketEventType } from '../../common-ts/socket-events';
-import { Client } from './client';
+import { Client, ClientType } from './client';
 
 export class Log {
 
     static eventReceived(type: SocketEventType, socketIoClientId: string, payload?: any) {
-        console.log(`Server received '${type}'(${payload ? JSON.stringify(payload) : ''}), socketIoClientId: '${socketIoClientId}'`);
+        this.log(`received '${type}'(${payload ? JSON.stringify(payload) : ''}), socketIoClientId: '${socketIoClientId}'`);
     }
 
     static eventSent(type: SocketEventType, gameId: string, clientUuid, socketIoClientId: string, payload?: any, ) {
-        console.log(`Server sent '${type}'(${payload ? JSON.stringify(payload) : ''}); gameId='${gameId}', clientUuid='${clientUuid}', socketIoClientId: '${socketIoClientId}'`);
+        this.log(`sent '${type}'(${payload ? JSON.stringify(payload) : ''}); gameId='${gameId}', clientUuid='${clientUuid}', socketIoClientId: '${socketIoClientId}'`);
     }
 
-    static invalidGameId(type: SocketEventType) {
-        console.error(`Server: Can't join game because game id doesn't exist! [${type}] `);
+    static disconnectedSocket(client: Client) {
+        this.log(`Socket disconnected for '${ClientType[client.type]}', socketIoClientId: '${client.socketIoClientId}', clientUuid: '${client.uuid}'`);
     }
 
-    static invalidClientUuid(type: SocketEventType) {
-        console.error(`Server: Invalid client uuid! Can't rejoin! [${type}]`);
+    static log(msg: string | object): void {
+        console.log('[Server]: ' + msg);
     }
 
-    static invalidGame(type: SocketEventType, gameId: string) {
-        console.error(`Server: Can't join game with id '${gameId}' via [${type}] because it doesn't exist (anymore)!`);
+    static warn(msg: string | object): void {
+        console.warn('[Server]: ' + msg);
     }
 
-    static addedClientToGame(type: SocketEventType, gameId: string, clientUuid: string, socketIoClientId: string, clientType: 'player' | 'gameMaster') {
-        console.log(`Server: Added ${clientType} (${clientUuid}) via [${type}] to game '${gameId}', socketIoClientId: '${socketIoClientId}'`);
+    static debug(msg: string | object): void {
+        console.debug('[Server]: ' + msg);
     }
 
-    static reconnectedClientToGame(type: SocketEventType, gameId: string, clientUuid: string, socketIoClientId: string, clientType: 'player' | 'gameMaster') {
-        console.log(`Server: Reconnected ${clientType} (${clientUuid}) via [${type}] to game '${gameId}', socketIoClientId: '${socketIoClientId}'`);
+    static error(msg: string | object): void {
+        console.error('[Server]: ' + msg);
     }
 
-    static disconnectedSocket(client: Client, clientType: 'player' | 'gameMaster') {
-        console.log(`Server: Manually disconnected '${clientType}', socketIoClientId: '${client.socketIoClientId}', clientUuid: '${client.uuid}'`);
+    static info(msg: string | object): void {
+        console.info('[Server]: ' + msg);
     }
+
+
 }
