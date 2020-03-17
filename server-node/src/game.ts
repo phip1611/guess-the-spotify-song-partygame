@@ -52,6 +52,10 @@ export class Game {
             if (this._gameMaster && this._gameMaster.uuid != client.uuid) {
                 throw new Error('New game master has different client uuid!');
             }
+            if (!this._gameMaster.dead) {
+                Log.warn(`Game#connectClient: reconnecting game masters old socket is not dead! disconnect it now! ${JSON.stringify(client.toPrintable())}`);
+                this._gameMaster.disconnect();
+            }
             Log.log(`Game#connectClient: new game master set; ${JSON.stringify(client.toPrintable())}`);
             this._gameMaster = client;
         } else {
@@ -59,7 +63,8 @@ export class Game {
             if (index !== -1) {
                 // remove old one
                 if (!this._players[index].dead) {
-                    throw new Error('Player to remove is not dead!');
+                    Log.warn(`Game#connectClient: reconnecting players old socket is not dead! disconnect it now! ${JSON.stringify(client.toPrintable())}`);
+                    this._players[index].disconnect();
                 }
                 this._players.splice(index, 1);
             }
