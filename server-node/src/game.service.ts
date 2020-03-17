@@ -189,7 +189,7 @@ export class GameService {
         const client = new Client(socket, clientType, clientUuid);
         clientUuid = client.uuid; // make sure this var has the latest value
 
-
+        let isNewGame = false;
         let game = this._gameIdToGameMap.get(gameId);
         if (!game) {
             // we create the game if its a GM_CREATE_GAME event
@@ -197,21 +197,26 @@ export class GameService {
                 if (!gameId) {
                     throw new Error(`Can't create a game with ID null!`);
                 }
+                // we connect the game master here already to the game
                 game = new Game(gameId, client);
                 this._gameIdToGameMap.set(gameId, game);
+                isNewGame = true;
             } else {
                 throw new Error(`Game with ${gameId} doesn't exist!`);
             }
         }
 
-        // now we know game, client and socket are valid
-        // game.connectClient does the rest
-        try {
-            game.connectClient(client);
-        } catch (e) {
-            Log.error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
-            Log.error(e);
-            throw new Error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
+        // Otherwise game master is already attached to the game
+        if (!isNewGame) {
+            // now we know game, client and socket are valid
+            // game.connectClient does the rest
+            try {
+                game.connectClient(client);
+            } catch (e) {
+                Log.error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
+                Log.error(e);
+                throw new Error(`Can't connect client ${JSON.stringify(client.toPrintable())} to game ${game.id}`);
+            }
         }
 
 
