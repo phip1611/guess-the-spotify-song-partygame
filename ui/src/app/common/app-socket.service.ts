@@ -17,7 +17,15 @@ export class AppSocket extends Socket {
   constructor() {
     // instead of forRoot we do this
     // because https://stackoverflow.com/questions/59840964
-    super({url: SOCKET_URL, options: {}});
+    super({
+      url: SOCKET_URL,
+      options: {
+        forceNew: true,
+        reconnectionDelay: 10,
+        reconnectionDelayMax: 500,
+        timeout: 100,
+      }
+    });
   }
 
 }
