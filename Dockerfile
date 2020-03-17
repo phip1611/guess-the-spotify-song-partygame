@@ -1,8 +1,9 @@
 FROM node:12
 WORKDIR /usr/src/app
 COPY server-node/build ./
+WORKDIR /usr/src/app/server-node/src
 RUN yarn install
-RUN mv node_modules server-node/src/
+WORKDIR /usr/src/app
 EXPOSE 8080
 # since we use two inputs for typescript (common-ts and server-node)
 # the output also creates the same directory structure in the
