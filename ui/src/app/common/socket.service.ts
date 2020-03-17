@@ -14,21 +14,12 @@ export class SocketService {
 
   private static readonly LOGGER = new Log(SocketService.name);
 
-  /**
-   * We need this because socket.io does two reconnects instead of one..
-   * don't know why :( .. the disconnect handler is called twice!
-   */
-  private reconnectAllowed = true;
-
   constructor(private socket: AppSocket,
               private clientService: CommonClientService) {
 
     socket.on('disconnect', (reason) => {
-      if (!this.reconnectAllowed) { return; }
-
       SocketService.LOGGER.warn('disconnect occurred: reason = ' + reason);
       socket.connect();
-      this.reconnectAllowed = false;
       if (this.clientService.clientUuid) {
         SocketService.LOGGER.info('tries to reconnect');
 
@@ -42,7 +33,6 @@ export class SocketService {
           if (uuid !== this.clientService.clientUuid) {
             throw new Error(`Server couldn't confirm our reconnect attempt! Abort! Mayday! Houston we have a problem!`);
           } else {
-            this.reconnectAllowed = true;
             SocketService.LOGGER.info('reconnect successful');
           }
         }, error => {
