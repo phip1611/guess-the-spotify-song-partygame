@@ -146,6 +146,7 @@ export class GameService {
             client.disconnect();
 
             // NO! this._clientUuidMap.delete(client.uuid);
+            // we wan't to recover a connection after a reconnect
             this._socketIoClientIdToClientMap.delete(socket.client.id);
         });
     }

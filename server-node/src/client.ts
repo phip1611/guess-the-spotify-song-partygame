@@ -75,9 +75,10 @@ export class Client {
 
         Log.disconnectedSocket(this);
 
-        // if (!this._socket.disconnected) {
-        this._socket.disconnect(true);
-        // }
+        if (!this._socket.disconnected) {
+        // this probably prevents double disconnects or so..
+            this._socket.disconnect(true);
+        }
         this._socket = null;
     }
 
