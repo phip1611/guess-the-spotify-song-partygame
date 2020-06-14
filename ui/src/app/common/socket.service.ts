@@ -31,7 +31,7 @@ export class SocketService {
         this.socket.emit(type, this.clientService.clientUuid);
         this.getServerConfirm().subscribe(uuid => {
           if (uuid !== this.clientService.clientUuid) {
-            throw new Error(`Server couldn't confirm our reconnect attempt! Abort! Mayday! Houston we have a problem!`);
+            throw new Error(`Server responded with invalid value! Abort! Mayday! Houston we have a problem!`);
           } else {
             SocketService.LOGGER.info('reconnect successful');
           }

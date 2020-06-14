@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Log } from 'ng-log';
 import { CommonClientService } from '../common/common-client.service';
+import { SpotifyPlaylistTrack } from '../common/spotify-playlist-track';
 
 export type PointsPerPlayerType = { playerName: string; points: number }[];
 
@@ -9,9 +10,9 @@ export class GameMasterService {
 
   private static readonly LOGGER = new Log(GameMasterService.name);
 
-  private songsAvailable: any[] = [];
+  private songsAvailable: SpotifyPlaylistTrack[] = [];
 
-  private songsPlayed: any[] = [];
+  private songsPlayed: SpotifyPlaylistTrack[] = [];
 
   private players: string[] = [];
 
@@ -28,7 +29,7 @@ export class GameMasterService {
    * There can only be one game at a time. We have the complete state (for the gm)
    * for the game in this service.
    */
-  createGame(songs: any[]) {
+  createGame(songs: SpotifyPlaylistTrack[]) {
     this.clientService.gameId = GameMasterService.generateGameId();
     this.songsAvailable = songs;
     this.round = 0;
@@ -60,11 +61,11 @@ export class GameMasterService {
     return this.players;
   }
 
-  getSongsAvailable(): any[] {
+  getSongsAvailable(): SpotifyPlaylistTrack[] {
     return this.songsAvailable;
   }
 
-  getSongsPlayed(): any[] {
+  getSongsPlayed(): SpotifyPlaylistTrack[] {
     return this.songsPlayed;
   }
 
@@ -76,7 +77,7 @@ export class GameMasterService {
     return this.pointsPerPlayer;
   }
 
-  getRandomSongAndMarkAsPlayed(): any {
+  getRandomSongAndMarkAsPlayed(): SpotifyPlaylistTrack {
     const index = this.getRandomSongIndex();
     const song = this.songsAvailable[index];
     this.songsAvailable.splice(index, 1);

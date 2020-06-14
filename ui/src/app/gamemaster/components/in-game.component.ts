@@ -4,6 +4,7 @@ import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { Log } from 'ng-log';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
+import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
 
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 
@@ -117,9 +118,16 @@ export class InGameComponent implements OnInit {
       const seconds = millis / 1000;
       const tmpArr = this.buzzerTimeByPlayerName;
       this.buzzerTimeByPlayerName = [];
-      tmpArr.push({
-        seconds: seconds, playerName: playerId
-      });
+      if (tmpArr.map(p => p.playerName).includes(playerId)) {
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
+      } else {
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
+        tmpArr.push({
+          seconds: seconds, playerName: playerId
+        });
+        InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
+        InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
+      }
       // do trigger angular change detection
       this.buzzerTimeByPlayerName = tmpArr;
     });
@@ -189,7 +197,7 @@ export class Playback {
 
   private _firstPlayedTime: Date;
 
-  constructor(spotifyTrack: any) {
+  constructor(spotifyTrack: SpotifyPlaylistTrack) {
     this._spotifyTrack = spotifyTrack;
     this.audio = new Audio(spotifyTrack.preview_url);
     this.audio.addEventListener('ended', () => this.stop());

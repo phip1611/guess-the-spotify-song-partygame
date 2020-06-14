@@ -146,6 +146,7 @@ export class GameService {
             client.disconnect();
 
             // NO! this._clientUuidMap.delete(client.uuid);
+            // we wan't to recover a connection after a reconnect
             this._socketIoClientIdToClientMap.delete(socket.client.id);
         });
     }
@@ -242,14 +243,14 @@ export class GameService {
         socket.on(SocketEventType.GM_START_NEXT_ROUND, () => {
             Log.eventReceived(SocketEventType.GM_START_NEXT_ROUND, socket.client.id);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
-            Log.info(`Forwarded GM_START_NEXT_ROUND to GM`);
+            Log.info(`Forwarded GM_START_NEXT_ROUND to all players`);
             game.playersConnected.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_START_NEXT_ROUND));
         });
 
         socket.on(SocketEventType.GM_ENABLE_BUZZER, () => {
             Log.eventReceived(SocketEventType.GM_ENABLE_BUZZER, socket.client.id);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
-            Log.info(`Forwarded GM_ENABLE_BUZZER to GM`);
+            Log.info(`Forwarded GM_ENABLE_BUZZER to all players`);
             game.playersConnected.map(p => p.socket).forEach(s => s.emit(SocketEventType.GM_ENABLE_BUZZER));
         });
     }
@@ -264,7 +265,7 @@ export class GameService {
         socket.on(SocketEventType.PLAYER_REGISTER, (playerName: PlayerRegisterPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_REGISTER, socket.client.id, playerName);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
-            Log.info(`Forwarded PLAYER_REGISTER(${playerName}) to GM`);
+            Log.info(`Forwarded PLAYER_REGISTER(${playerName}) to GM (${game.gameMaster.socketIoClientId})`);
             game.gameMaster.socket.emit(SocketEventType.PLAYER_REGISTER, playerName);
         });
 
@@ -272,7 +273,7 @@ export class GameService {
         socket.on(SocketEventType.PLAYER_BUZZER, (playerName: PlayerBuzzerPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_BUZZER, socket.client.id, playerName);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
-            Log.info(`Forwarded PLAYER_BUZZER(${playerName}) to GM`);
+            Log.info(`Forwarded PLAYER_BUZZER(${playerName}) to GM (${game.gameMaster.socketIoClientId})`);
             game.gameMaster.socket.emit(SocketEventType.PLAYER_BUZZER, playerName);
         });
     }
