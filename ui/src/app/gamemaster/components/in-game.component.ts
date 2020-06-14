@@ -119,11 +119,14 @@ export class InGameComponent implements OnInit {
       const tmpArr = this.buzzerTimeByPlayerName;
       this.buzzerTimeByPlayerName = [];
       if (tmpArr.map(p => p.playerName).includes(playerId)) {
-        InGameComponent.LOGGER.debug(`PLAYER_BUZZER for player '${playerId}' received multiple times; ignore`);
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
       } else {
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
         tmpArr.push({
           seconds: seconds, playerName: playerId
         });
+        InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
+        InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
       }
       // do trigger angular change detection
       this.buzzerTimeByPlayerName = tmpArr;

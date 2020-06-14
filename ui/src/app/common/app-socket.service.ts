@@ -29,7 +29,7 @@ export class AppSocket extends Socket {
     });
 
     if (!environment.production) {
-      AppSocket.LOGGER.debug(`Socket ist global als Variable "socket" (window.socket) verfügbar`);
+      AppSocket.LOGGER.debug(`Socket is available as global var "socket" (window.socket)`);
       (window as any).socket = this;
     }
   }
