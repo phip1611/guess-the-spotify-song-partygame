@@ -45,6 +45,9 @@ export class AppServer {
 
         this.expressApp.use(express.static(AppServer.ANGULAR_DIR));
 
+        // TODO only if debug
+        this.setupInfoEndpoint();
+
         // ---- SERVE ANGULAR APPLICATION PATHS ---- //
 
         // found good solution to allow endpoints we may have but redirect everything to this..
@@ -60,7 +63,7 @@ export class AppServer {
         return this.socketIo;
     }
 
-    /*public setupInfoEndpoint() {
+    private setupInfoEndpoint() {
         const endpoint = '/info';
         const gs = GameService.getInstance();
         this.expressApp.get(endpoint, (req: Request, res: Response) => {
@@ -72,7 +75,7 @@ export class AppServer {
                 sockets: Array.from(gs.socketIoClientIdToClientMap.keys())
             });
         });
-    }*/
+    }
 
     public close() {
         this.socketIo.close();
