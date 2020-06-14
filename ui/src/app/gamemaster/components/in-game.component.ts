@@ -4,6 +4,7 @@ import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { Log } from 'ng-log';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
+import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
 
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 
@@ -189,7 +190,7 @@ export class Playback {
 
   private _firstPlayedTime: Date;
 
-  constructor(spotifyTrack: any) {
+  constructor(spotifyTrack: SpotifyPlaylistTrack) {
     this._spotifyTrack = spotifyTrack;
     this.audio = new Audio(spotifyTrack.preview_url);
     this.audio.addEventListener('ended', () => this.stop());
