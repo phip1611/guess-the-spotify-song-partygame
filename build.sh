@@ -26,4 +26,4 @@ yarn run tsc
 
 cd ..
 
-docker build -t phip1611:guess-spotify-song-game .
+docker build -t phip1611/song-game .
