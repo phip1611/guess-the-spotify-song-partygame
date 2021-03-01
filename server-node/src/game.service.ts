@@ -76,6 +76,7 @@ export class GameService {
          * This event will not be forwarded to any player.
          */
         socket.on(SocketEventType.GM_CREATE_GAME, (gameId: GmCreateGamePayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.GM_CREATE_GAME, socket.client.id, gameId);
 
             try {
@@ -92,6 +93,7 @@ export class GameService {
          * This event will not be forwarded to the game master.
          */
         socket.on(SocketEventType.PLAYER_HELLO, (gameId: PlayerHelloPayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.PLAYER_HELLO, socket.client.id, gameId);
 
             try {
@@ -107,6 +109,7 @@ export class GameService {
          * GM_RECONNECT means a game master want to rejoin an existing game.
          */
         socket.on(SocketEventType.GM_RECONNECT, (uuid: GmReconnectPayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.GM_RECONNECT, socket.client.id, uuid);
 
             let gameId;
@@ -123,6 +126,7 @@ export class GameService {
          * PLAYER_RECONNECT means a game master want to rejoin an existing game.
          */
         socket.on(SocketEventType.PLAYER_RECONNECT, (uuid: PlayerReconnectPayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.PLAYER_RECONNECT, socket.client.id, uuid);
 
             let gameId;
@@ -137,7 +141,9 @@ export class GameService {
 
         // socket.on('disconnect', reason => {
         socket.once('disconnect', reason => {
+            // @ts-ignore
             Log.info(`Socket '${socket.client.id}' disconnected because of: ${reason}`);
+            // @ts-ignore
             const client = this._socketIoClientIdToClientMap.get(socket.client.id);
             if (!client) return;
 
@@ -147,6 +153,7 @@ export class GameService {
 
             // NO! this._clientUuidMap.delete(client.uuid);
             // we wan't to recover a connection after a reconnect
+            // @ts-ignore
             this._socketIoClientIdToClientMap.delete(socket.client.id);
         });
     }
@@ -241,6 +248,7 @@ export class GameService {
     private setUpForwardGmSocketEventsHandler(socket: SocketIO.Socket, gameId: string) {
 
         socket.on(SocketEventType.GM_START_NEXT_ROUND, () => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.GM_START_NEXT_ROUND, socket.client.id);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
             Log.info(`Forwarded GM_START_NEXT_ROUND to all players`);
@@ -248,6 +256,7 @@ export class GameService {
         });
 
         socket.on(SocketEventType.GM_ENABLE_BUZZER, () => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.GM_ENABLE_BUZZER, socket.client.id);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
             Log.info(`Forwarded GM_ENABLE_BUZZER to all players`);
@@ -263,6 +272,7 @@ export class GameService {
      */
     private setUpForwardPlayerSocketEventsHandler(socket: SocketIO.Socket, gameId: string) {
         socket.on(SocketEventType.PLAYER_REGISTER, (playerName: PlayerRegisterPayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.PLAYER_REGISTER, socket.client.id, playerName);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
             Log.info(`Forwarded PLAYER_REGISTER(${playerName}) to GM (${game.gameMaster.socketIoClientId})`);
@@ -271,6 +281,7 @@ export class GameService {
 
         // a player hits the buzzer, let the game master now it
         socket.on(SocketEventType.PLAYER_BUZZER, (playerName: PlayerBuzzerPayload) => {
+            // @ts-ignore
             Log.eventReceived(SocketEventType.PLAYER_BUZZER, socket.client.id, playerName);
             const game = this.gameIdToGameMap.get(gameId); // get the latest object
             Log.info(`Forwarded PLAYER_BUZZER(${playerName}) to GM (${game.gameMaster.socketIoClientId})`);

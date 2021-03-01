@@ -41,7 +41,7 @@ export class AppServer {
 
         this.expressApp = express();
         this.httpServer = http.createServer(this.expressApp);
-        this.socketIo = SocketIO(this.httpServer);
+        this.socketIo = new SocketIO(this.httpServer);
 
         this.expressApp.use(express.static(AppServer.ANGULAR_DIR));
 

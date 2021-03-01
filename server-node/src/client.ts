@@ -55,6 +55,7 @@ export class Client {
     // returns the client id of the connection from socket io
     // useful for debugging
     get socketIoClientId(): string {
+        // @ts-ignore
         return this._socket ? this._socket.client.id : null;
     }
 
