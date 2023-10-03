@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { PlayerModule } from './player.module';
+import {Logger} from "../common/logger";
 
 @Injectable()
 export class PlayerService {
 
-  // private static readonly LOGGER = new Log(PlayerService.name);
+  private static readonly LOGGER = new Logger(PlayerService.name);
 
   private playerName: string;
 

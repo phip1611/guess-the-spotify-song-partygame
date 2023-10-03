@@ -4,6 +4,7 @@ import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn,
 import { GameMasterService } from '../game-master.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonClientService } from '../../common/common-client.service';
+import { Logger } from 'src/app/common/logger';
 
 @Component({
   selector: 'app-gm-create-new-game',
@@ -46,7 +47,7 @@ import { CommonClientService } from '../../common/common-client.service';
 })
 export class CreateNewGameComponent implements OnInit {
 
-  // private static readonly LOGGER = new Log(CreateNewGameComponent.name);
+  private static readonly LOGGER = new Logger(CreateNewGameComponent.name);
 
   form: FormGroup;
 
@@ -76,8 +77,8 @@ export class CreateNewGameComponent implements OnInit {
         this.gameMasterService.createGame(songs);
         this.done.next();
       }, error: (err: HttpErrorResponse) => {
-        // CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
-        // CreateNewGameComponent.LOGGER.error(err.message);
+        CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
+        CreateNewGameComponent.LOGGER.error(err.message);
         if (err.status === 401) {
           this.spotifyService.setAuthToken(null);
           this.spotifyService.openAuthWebsite();

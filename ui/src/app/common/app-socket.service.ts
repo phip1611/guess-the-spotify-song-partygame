@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { SOCKET_URL } from './config/urls';
 import { environment } from '../../environments/environment';
+import {Logger} from "./logger";
 
 /**
  * Because https://stackoverflow.com/questions/59840964
@@ -12,7 +13,7 @@ import { environment } from '../../environments/environment';
 })
 export class AppSocket extends Socket {
 
-  // private static readonly LOGGER = new Log(AppSocket.name);
+  private static readonly LOGGER = new Logger(AppSocket.name);
 
   constructor() {
     // instead of forRoot we do this
@@ -28,7 +29,7 @@ export class AppSocket extends Socket {
     });
 
     if (!environment.production) {
-      // AppSocket.LOGGER.debug(`Socket is available as global var "socket" (window.socket)`);
+      AppSocket.LOGGER.debug(`Socket is available as global var "socket" (window.socket)`);
       (window as any).socket = this;
     }
   }

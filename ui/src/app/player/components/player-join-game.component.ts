@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
 import { PlayerService } from '../player.service';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
+import { Logger } from 'src/app/common/logger';
 
 @Component({
   selector: 'app-player-join-game',
@@ -43,7 +44,7 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
 })
 export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
-  // private static readonly LOGGER = new Log(PlayerJoinGameComponent.name);
+  private static readonly LOGGER = new Logger(PlayerJoinGameComponent.name);
 
   form: FormGroup;
 

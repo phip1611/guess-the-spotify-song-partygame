@@ -4,6 +4,7 @@ import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
+import {Logger} from "../../common/logger";
 
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 
@@ -82,7 +83,7 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 })
 export class InGameComponent implements OnInit {
 
-  // private static readonly LOGGER = new Log(InGameComponent.name);
+  private static readonly LOGGER = new Logger(InGameComponent.name);
 
   isVeryFirstRound: boolean = true;
 
@@ -118,14 +119,14 @@ export class InGameComponent implements OnInit {
       const tmpArr = this.buzzerTimeByPlayerName;
       this.buzzerTimeByPlayerName = [];
       if (tmpArr.map(p => p.playerName).includes(playerId)) {
-        // InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
       } else {
-        // InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
+        InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
         tmpArr.push({
           seconds: seconds, playerName: playerId
         });
-        // InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
-        // InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
+        InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
+        InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
       }
       // do trigger angular change detection
       this.buzzerTimeByPlayerName = tmpArr;
@@ -135,9 +136,9 @@ export class InGameComponent implements OnInit {
   onNextRound() {
     // just increment the round counter
     this.gameMasterService.nextRound();
-    /*InGameComponent.LOGGER.debug(
+    InGameComponent.LOGGER.debug(
       `Starting Round ${this.gameMasterService.getRound()}/${this.gameMasterService.getTotalRounds()}`
-    );*/
+    );
 
     this.showSolution = false;
 
@@ -184,7 +185,7 @@ export class Playback {
     return this._spotifyTrack;
   }
 
-  // private static readonly LOGGER = new Log(Playback.name);
+  private static readonly LOGGER = new Logger(Playback.name);
 
   private readonly _spotifyTrack: any;
 
@@ -204,7 +205,7 @@ export class Playback {
 
   public play(): void {
     if (this._isPlaying) {
-      // Playback.LOGGER.debug('music is already playing!');
+      Playback.LOGGER.debug('music is already playing!');
       return;
     }
     if (!this._firstPlayedTime) {

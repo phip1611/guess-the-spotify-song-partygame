@@ -2,13 +2,14 @@
  * Holds the data that describes the state between the server and the client.
  */
 import { Injectable } from '@angular/core';
+import {Logger} from "./logger";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommonClientService {
 
-  // private static readonly LOGGER = new Log(CommonClientService.name);
+  private static readonly LOGGER = new Logger(CommonClientService.name);
 
   private _clientUuid: string = "";
 
@@ -34,7 +35,7 @@ export class CommonClientService {
 
   get playerType(): 'player' | 'gameMaster' {
     if (this._playerType === null) {
-      // CommonClientService.LOGGER.warn('PlayerType is null!');
+      CommonClientService.LOGGER.warn('PlayerType is null!');
     }
     return this._playerType;
   }

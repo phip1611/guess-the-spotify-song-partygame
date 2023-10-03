@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { JOIN_GAME_URL } from '../../common/config/urls';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { CommonClientService } from '../../common/common-client.service';
+import {Logger} from "../../common/logger";
 
 @Component({
   selector: 'app-gm-show-link',
@@ -35,7 +36,7 @@ import { CommonClientService } from '../../common/common-client.service';
 })
 export class ShowLinkComponent implements OnInit, OnDestroy {
 
-  // private static readonly LOGGER = new Log(ShowLinkComponent.name);
+  private static readonly LOGGER = new Logger(ShowLinkComponent.name);
 
   public player: string[] = [];
 
@@ -62,11 +63,11 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
 
     this.socketService.getServerConfirm().subscribe(uuid => {
       this.clientService.clientUuid = uuid;
-      // ShowLinkComponent.LOGGER.info('GM_CREATE_GAME von Server bestätigt');
+      ShowLinkComponent.LOGGER.info('GM_CREATE_GAME von Server bestätigt');
     });
 
     this.subscription = this.socketService.getPlayerRegistered().subscribe(playerId => {
-      // ShowLinkComponent.LOGGER.debug('Got signal from socket service that a players want to register');
+      ShowLinkComponent.LOGGER.debug('Got signal from socket service that a players want to register');
       this.gameMasterService.addPlayer(playerId);
       this.player = this.gameMasterService.getPlayers();
     });
