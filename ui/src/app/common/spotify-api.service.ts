@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SPOTIFY_REDIRECT_URL } from './config/urls';
+import {Logger} from "./logger";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyApiService {
 
-  private static readonly LOGGER = new Log(SpotifyApiService.name);
+  private static readonly LOGGER = new Logger(SpotifyApiService.name);
 
   // from https://developer.spotify.com/dashboard/applications/
   private static readonly CLIENT_ID = 'd5b188f88aa342538c1150c4f4decb4c';
@@ -21,10 +21,10 @@ export class SpotifyApiService {
 
   private static readonly SPOTIFY_URL_TRACK_INFO = 'https://api.spotify.com/v1/tracks/{track_id}';
 
-  private authToken: string;
+  private authToken: string | null;
 
   constructor(private http: HttpClient) {
-    this.authToken = localStorage.getItem('SPOTIFY_AUTH_TOKEN');
+    this.authToken = localStorage.getItem('SPOTIFY_AUTH_TOKEN') || "";
   }
 
   openAuthWebsite(): void {
@@ -40,7 +40,7 @@ export class SpotifyApiService {
     window.location.href = SpotifyApiService.SPOTIFY_URI_LOGIN + '?' + paramss;
   }
 
-  setAuthToken(authToken: string) {
+  setAuthToken(authToken: string | null) {
     SpotifyApiService.LOGGER.debug('Auth token set!');
     if (authToken) {
       localStorage.setItem('SPOTIFY_AUTH_TOKEN', authToken);
@@ -50,7 +50,7 @@ export class SpotifyApiService {
     this.authToken = authToken;
   }
 
-  getAuthToken(): string {
+  getAuthToken(): string | null {
     return this.authToken;
   }
 

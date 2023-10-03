@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
 import { SocketService } from '../common/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { SocketEventType } from '../../../../common-ts/socket-events';
 import { CommonClientService } from '../common/common-client.service';
+import {Logger} from "../common/logger";
 
 @Component({
   selector: 'app-player',
@@ -17,7 +17,7 @@ import { CommonClientService } from '../common/common-client.service';
 })
 export class PlayerComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(PlayerComponent.name);
+  private static readonly LOGGER = new Logger(PlayerComponent.name);
 
   state: PlayerState = PlayerState.JOIN_GAME;
 

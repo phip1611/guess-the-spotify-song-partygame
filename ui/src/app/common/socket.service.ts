@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Log } from 'ng-log';
 // tslint:disable-next-line:max-line-length
 import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, ServerConfirmPayload, SocketEvent, SocketEventType } from '../../../../common-ts/socket-events';
 import { AppSocket } from './app-socket.service';
 import { CommonClientService } from './common-client.service';
+import {Logger} from "./logger";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
 
-  private static readonly LOGGER = new Log(SocketService.name);
+  private static readonly LOGGER = new Logger(SocketService.name);
 
   constructor(private socket: AppSocket,
               private clientService: CommonClientService) {

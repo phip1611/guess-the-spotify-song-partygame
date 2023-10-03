@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
 import { CommonClientService } from '../common/common-client.service';
 import { SpotifyPlaylistTrack } from '../common/spotify-playlist-track';
+import {Logger} from "../common/logger";
 
 export type PointsPerPlayerType = { playerName: string; points: number }[];
 
 @Injectable()
 export class GameMasterService {
 
-  private static readonly LOGGER = new Log(GameMasterService.name);
+  private static readonly LOGGER = new Logger(GameMasterService.name);
 
   private songsAvailable: SpotifyPlaylistTrack[] = [];
 
@@ -18,9 +18,9 @@ export class GameMasterService {
 
   private pointsPerPlayer: PointsPerPlayerType = [];
 
-  private round: number;
+  private round: number = 0;
 
-  private totalRounds: number;
+  private totalRounds: number = 0;
 
   constructor(private clientService: CommonClientService) {
   }

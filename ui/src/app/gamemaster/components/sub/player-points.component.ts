@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
 import { GameMasterService, PointsPerPlayerType } from '../../game-master.service';
-
+import {Logger} from "../../../common/logger";
 
 @Component({
   selector: 'app-player-points',
@@ -32,7 +31,7 @@ import { GameMasterService, PointsPerPlayerType } from '../../game-master.servic
 })
 export class PlayerPointsComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(PlayerPointsComponent.name);
+  private static readonly LOGGER = new Logger(PlayerPointsComponent.name);
 
   playerPoints: PointsPerPlayerType = [];
 

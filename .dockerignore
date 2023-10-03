@@ -4,3 +4,5 @@ README.md
 .gitignore
 server-node/
 !server-node/build
+
+result*

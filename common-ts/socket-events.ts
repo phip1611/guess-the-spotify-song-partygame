@@ -71,4 +71,4 @@ export type SocketPayload = GmCreateGamePayload |
     PlayerHelloPayload |
     PlayerBuzzerPayload |
     PlayerReconnectPayload |
-    ServerConfirmPayload;
+    ServerConfirmPayload | null;

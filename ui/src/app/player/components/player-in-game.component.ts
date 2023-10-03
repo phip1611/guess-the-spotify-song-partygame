@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { PlayerService } from '../player.service';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { AppSocket } from '../../common/app-socket.service';
+import {Logger} from "../../common/logger";
 
 @Component({
   selector: 'app-player-in-game',
@@ -25,7 +25,7 @@ import { AppSocket } from '../../common/app-socket.service';
 })
 export class PlayerInGameComponent implements OnInit, OnDestroy {
 
-  private static readonly LOGGER = new Log(PlayerInGameComponent.name);
+  private static readonly LOGGER = new Logger(PlayerInGameComponent.name);
 
   buzzerEnabled = false;
 

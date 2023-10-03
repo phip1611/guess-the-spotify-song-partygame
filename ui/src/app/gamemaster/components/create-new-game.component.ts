@@ -1,17 +1,17 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
 import { SpotifyApiService } from '../../common/spotify-api.service';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonClientService } from '../../common/common-client.service';
+import { Logger } from 'src/app/common/logger';
 
 @Component({
   selector: 'app-gm-create-new-game',
   template: `
     <ng-container *ngIf="!spotifyService.isConnected()">
       <mat-card>
-        <div class="d-flex justify-content-center">
+        <div class="py-3 d-flex justify-content-center">
           <button mat-raised-button color="primary" (click)="onConnect()"
           >
             <mat-icon>music_note</mat-icon>
@@ -47,12 +47,12 @@ import { CommonClientService } from '../../common/common-client.service';
 })
 export class CreateNewGameComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(CreateNewGameComponent.name);
+  private static readonly LOGGER = new Logger(CreateNewGameComponent.name);
 
   form: FormGroup;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   constructor(public spotifyService: SpotifyApiService,
               private clientService: CommonClientService,
@@ -71,15 +71,18 @@ export class CreateNewGameComponent implements OnInit {
   }
 
   startGame() {
-    this.spotifyService.getPlaylistData(this.form.get('spotifyPlaylist').value).subscribe(songs => {
-      this.gameMasterService.createGame(songs);
-      this.done.next();
-    }, (err: HttpErrorResponse) => {
-      CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
-      CreateNewGameComponent.LOGGER.error(err.message);
-      if (err.status === 401) {
-        this.spotifyService.setAuthToken(null);
-        this.spotifyService.openAuthWebsite();
+    const playlistId = this.form.get('spotifyPlaylist')?.value;
+    this.spotifyService.getPlaylistData(playlistId).subscribe({
+      next: songs => {
+        this.gameMasterService.createGame(songs);
+        this.done.next();
+      }, error: (err: HttpErrorResponse) => {
+        CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
+        CreateNewGameComponent.LOGGER.error(err.message);
+        if (err.status === 401) {
+          this.spotifyService.setAuthToken(null);
+          this.spotifyService.openAuthWebsite();
+        }
       }
     });
   }

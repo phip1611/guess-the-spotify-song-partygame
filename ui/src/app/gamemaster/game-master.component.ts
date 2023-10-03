@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
-import { SocketService } from '../common/socket.service';
 import { CommonClientService } from '../common/common-client.service';
+import {Logger} from "../common/logger";
 
 @Component({
   selector: 'app-game-master',
@@ -18,7 +17,7 @@ import { CommonClientService } from '../common/common-client.service';
 })
 export class GameMasterComponent implements OnInit, OnDestroy {
 
-  private static readonly LOGGER = new Log(GameMasterComponent.name);
+  private static readonly LOGGER = new Logger(GameMasterComponent.name);
 
   public state: GameMasterState = GameMasterState.CREATE_GAME;
 

@@ -1,23 +1,14 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [],
-    "paths": {
-      // https://stackoverflow.com/questions/58259660/how-to-avoid-module-not-found-error-cant-resolve-tslib-error-when-referen
-      "tslib": ["node_modules/tslib"]
-    }
+    "types": []
   },
   "files": [
-    "src/main.ts",
-    "src/polyfills.ts"
+    "src/main.ts"
   ],
   "include": [
-    "src/**/*.ts",
-    "../common-ts/**/*.ts"
-  ],
-  "exclude": [
-    "src/test.ts",
-    "src/**/*.spec.ts"
+    "src/**/*.d.ts"
   ]
 }

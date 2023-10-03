@@ -1,13 +1,13 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SpotifyApiService } from '../spotify-api.service';
-import { Log } from 'ng-log';
 import { Injectable } from '@angular/core';
+import {Logger} from "../logger";
 
 @Injectable()
 export class SpotifyTokenInterceptor implements HttpInterceptor {
 
-  private static readonly LOGGER = new Log(SpotifyTokenInterceptor.name);
+  private static readonly LOGGER = new Logger(SpotifyTokenInterceptor.name);
 
   constructor(private spotifyApiService: SpotifyApiService) {
   }
