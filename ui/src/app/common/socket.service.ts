@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Log } from 'ng-log';
 // tslint:disable-next-line:max-line-length
 import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, ServerConfirmPayload, SocketEvent, SocketEventType } from '../../../../common-ts/socket-events';
 import { AppSocket } from './app-socket.service';
@@ -12,16 +11,16 @@ import { CommonClientService } from './common-client.service';
 })
 export class SocketService {
 
-  private static readonly LOGGER = new Log(SocketService.name);
+  // private static readonly LOGGER = new Log(SocketService.name);
 
   constructor(private socket: AppSocket,
               private clientService: CommonClientService) {
 
     socket.on('disconnect', (reason) => {
-      SocketService.LOGGER.warn('disconnect occurred: reason = ' + reason);
+      // SocketService.LOGGER.warn('disconnect occurred: reason = ' + reason);
       socket.connect();
       if (this.clientService.clientUuid) {
-        SocketService.LOGGER.info('tries to reconnect');
+        // SocketService.LOGGER.info('tries to reconnect');
 
         // this handles the soft disconnect
         // i.e. connection lost without browser tab refresh
@@ -33,13 +32,13 @@ export class SocketService {
           if (uuid !== this.clientService.clientUuid) {
             throw new Error(`Server responded with invalid value! Abort! Mayday! Houston we have a problem!`);
           } else {
-            SocketService.LOGGER.info('reconnect successful');
+            // SocketService.LOGGER.info('reconnect successful');
           }
         }, error => {
           throw new Error(`Server couldn't confirm our reconnect attempt! Server gone? - ` + error.toString());
         });
       } else {
-        SocketService.LOGGER.error('client uuid is null! can\'r rejoin any game!');
+        // SocketService.LOGGER.error('client uuid is null! can\'r rejoin any game!');
       }
     });
   }
@@ -49,7 +48,7 @@ export class SocketService {
   }
 
   sendMessage(event: SocketEvent): void {
-    SocketService.LOGGER.debug(`sent message through socket! ${event.type}(${event.payload})`);
+    // SocketService.LOGGER.debug(`sent message through socket! ${event.type}(${event.payload})`);
     this.socket.emit(event.type, event.payload);
   }
 

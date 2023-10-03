@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Log } from 'ng-log';
 import { SpotifyApiService } from '../common/spotify-api.service';
 
 @Component({
@@ -9,7 +8,7 @@ import { SpotifyApiService } from '../common/spotify-api.service';
 })
 export class SpotifyRedirectComponent implements OnInit, OnDestroy {
 
-  private static readonly LOGGER = new Log(SpotifyRedirectComponent.name);
+  // private static readonly LOGGER = new Log(SpotifyRedirectComponent.name);
 
 
   constructor(private spotifyApiService: SpotifyApiService,

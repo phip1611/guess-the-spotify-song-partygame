@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
 import { CommonClientService } from '../common/common-client.service';
 import { SpotifyPlaylistTrack } from '../common/spotify-playlist-track';
 
@@ -8,7 +7,7 @@ export type PointsPerPlayerType = { playerName: string; points: number }[];
 @Injectable()
 export class GameMasterService {
 
-  private static readonly LOGGER = new Log(GameMasterService.name);
+  // private static readonly LOGGER = new Log(GameMasterService.name);
 
   private songsAvailable: SpotifyPlaylistTrack[] = [];
 
@@ -18,9 +17,9 @@ export class GameMasterService {
 
   private pointsPerPlayer: PointsPerPlayerType = [];
 
-  private round: number;
+  private round: number = 0;
 
-  private totalRounds: number;
+  private totalRounds: number = 0;
 
   constructor(private clientService: CommonClientService) {
   }
@@ -46,14 +45,14 @@ export class GameMasterService {
 
   addPlayer(playerName: string): void {
     if (!this.players.includes(playerName)) {
-      GameMasterService.LOGGER.debug(`Player ${playerName} joined the game`);
+      // GameMasterService.LOGGER.debug(`Player ${playerName} joined the game`);
       this.players.push(playerName);
       this.pointsPerPlayer.push({
         playerName: playerName,
         points: 0
       });
     } else {
-      GameMasterService.LOGGER.error(`Player ${playerName} already registered!`);
+      // GameMasterService.LOGGER.error(`Player ${playerName} already registered!`);
     }
   }
 

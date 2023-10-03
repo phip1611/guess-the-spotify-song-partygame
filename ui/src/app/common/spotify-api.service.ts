@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -10,7 +9,7 @@ import { SPOTIFY_REDIRECT_URL } from './config/urls';
 })
 export class SpotifyApiService {
 
-  private static readonly LOGGER = new Log(SpotifyApiService.name);
+  // private static readonly LOGGER = new Log(SpotifyApiService.name);
 
   // from https://developer.spotify.com/dashboard/applications/
   private static readonly CLIENT_ID = 'd5b188f88aa342538c1150c4f4decb4c';
@@ -21,10 +20,10 @@ export class SpotifyApiService {
 
   private static readonly SPOTIFY_URL_TRACK_INFO = 'https://api.spotify.com/v1/tracks/{track_id}';
 
-  private authToken: string;
+  private authToken: string | null;
 
   constructor(private http: HttpClient) {
-    this.authToken = localStorage.getItem('SPOTIFY_AUTH_TOKEN');
+    this.authToken = localStorage.getItem('SPOTIFY_AUTH_TOKEN') || "";
   }
 
   openAuthWebsite(): void {
@@ -40,8 +39,8 @@ export class SpotifyApiService {
     window.location.href = SpotifyApiService.SPOTIFY_URI_LOGIN + '?' + paramss;
   }
 
-  setAuthToken(authToken: string) {
-    SpotifyApiService.LOGGER.debug('Auth token set!');
+  setAuthToken(authToken: string | null) {
+    // SpotifyApiService.LOGGER.debug('Auth token set!');
     if (authToken) {
       localStorage.setItem('SPOTIFY_AUTH_TOKEN', authToken);
     } else {
@@ -50,7 +49,7 @@ export class SpotifyApiService {
     this.authToken = authToken;
   }
 
-  getAuthToken(): string {
+  getAuthToken(): string | null {
     return this.authToken;
   }
 
@@ -64,7 +63,7 @@ export class SpotifyApiService {
     const id = SpotifyApiService.parseIdString(playlistId);
 
     const url = SpotifyApiService.SPOTIFY_URL_PLAYLIST_TRACKS.replace('{playlist_id}', id);
-    SpotifyApiService.LOGGER.debug('Request to spotify playlist api url: "' + url + '"');
+    // SpotifyApiService.LOGGER.debug('Request to spotify playlist api url: "' + url + '"');
 
     // todo check for pageable and not just take first 100
     return this.http.get<any>(url).pipe(

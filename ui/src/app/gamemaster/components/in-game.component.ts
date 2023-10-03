@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
-import { Log } from 'ng-log';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
 
@@ -18,7 +17,7 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
         <div class="row">
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="!playback?.playedOnce"
+                    [disabled]="!playback.playedOnce"
                     mat-raised-button color="accent"
                     (click)="showSolution = !showSolution; solutionShowedOnce = true">
               Lösung
@@ -26,7 +25,7 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
           </div>
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="playback?.isPlaying"
+                    [disabled]="playback.isPlaying"
                     mat-raised-button color="warn"
                     (click)="onPlaySong()">
               Song abspielen
@@ -34,7 +33,7 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
           </div>
           <div class="col-12 col-md-4 mt-2 mt-md-0">
             <button *ngIf="gameMasterService.hasMoreSongs()" class="w-100"
-                    [disabled]="!playback?.playedOnce || !solutionShowedOnce"
+                    [disabled]="!playback.playedOnce || !solutionShowedOnce"
                     mat-raised-button color="primary"
                     (click)="onNextRound()">
               Nächste Runde
@@ -83,7 +82,7 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 })
 export class InGameComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(InGameComponent.name);
+  // private static readonly LOGGER = new Log(InGameComponent.name);
 
   isVeryFirstRound: boolean = true;
 
@@ -119,14 +118,14 @@ export class InGameComponent implements OnInit {
       const tmpArr = this.buzzerTimeByPlayerName;
       this.buzzerTimeByPlayerName = [];
       if (tmpArr.map(p => p.playerName).includes(playerId)) {
-        InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
+        // InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
       } else {
-        InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
+        // InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
         tmpArr.push({
           seconds: seconds, playerName: playerId
         });
-        InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
-        InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
+        // InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
+        // InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
       }
       // do trigger angular change detection
       this.buzzerTimeByPlayerName = tmpArr;
@@ -136,9 +135,9 @@ export class InGameComponent implements OnInit {
   onNextRound() {
     // just increment the round counter
     this.gameMasterService.nextRound();
-    InGameComponent.LOGGER.debug(
+    /*InGameComponent.LOGGER.debug(
       `Starting Round ${this.gameMasterService.getRound()}/${this.gameMasterService.getTotalRounds()}`
-    );
+    );*/
 
     this.showSolution = false;
 
@@ -185,7 +184,7 @@ export class Playback {
     return this._spotifyTrack;
   }
 
-  private static readonly LOGGER = new Log(Playback.name);
+  // private static readonly LOGGER = new Log(Playback.name);
 
   private readonly _spotifyTrack: any;
 
@@ -205,7 +204,7 @@ export class Playback {
 
   public play(): void {
     if (this._isPlaying) {
-      Playback.LOGGER.debug('music is already playing!');
+      // Playback.LOGGER.debug('music is already playing!');
       return;
     }
     if (!this._firstPlayedTime) {

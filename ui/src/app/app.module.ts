@@ -3,6 +3,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {BrowserAnimationsModule, provideAnimations} from '@angular/platform-browser/animations';
 import {AppCommonModule} from "./common/app-common.module";
+import {HTTP_INTERCEPTORS} from "@angular/common/http";
+import {SpotifyTokenInterceptor} from "./common/interceptor/spotify-token.interceptor";
+import {PlayerModule} from "./player/player.module";
+import {GameMasterModule} from "./gamemaster/game-master.module";
 
 @NgModule({
   declarations: [
@@ -13,13 +17,12 @@ import {AppCommonModule} from "./common/app-common.module";
     BrowserAnimationsModule,
 
     AppCommonModule,
-    // PlayerModule,
-    // GameMasterModule,
+    PlayerModule,
+    GameMasterModule,
   ],
   providers: [
-    provideAnimations()
-    // {provide: HTTP_INTERCEPTORS, useClass: SpotifyTokenInterceptor, multi: true},
-
+    provideAnimations(),
+    {provide: HTTP_INTERCEPTORS, useClass: SpotifyTokenInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })
