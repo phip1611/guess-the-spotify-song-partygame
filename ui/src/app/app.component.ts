@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
+// import { Log } from 'ng-log';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +20,7 @@ import { Log } from 'ng-log';
 })
 export class AppComponent implements OnInit {
 
-  private static readonly LOGGER = new Log(AppComponent.name);
+  // private static readonly LOGGER = new Log(AppComponent.name);
 
   constructor() {
   }
