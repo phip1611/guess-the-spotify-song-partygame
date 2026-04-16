@@ -74,18 +74,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "song-game:build"
+            "buildTarget": "song-game:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "song-game:build:production"
+              "buildTarget": "song-game:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "song-game:build"
+            "buildTarget": "song-game:build"
           }
         },
         "test": {
