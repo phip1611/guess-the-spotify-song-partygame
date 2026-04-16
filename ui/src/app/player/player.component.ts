@@ -8,12 +8,16 @@ import { CommonClientService } from '../common/common-client.service';
 @Component({
     selector: 'app-player',
     template: `
-    <app-player-join-game *ngIf="state === 0"
-                          (done)="onGameStarts()"
-    ></app-player-join-game>
-    <app-player-in-game *ngIf="state === 1"
-    ></app-player-in-game>
-  `,
+    @if (state === 0) {
+      <app-player-join-game
+        (done)="onGameStarts()"
+      ></app-player-join-game>
+    }
+    @if (state === 1) {
+      <app-player-in-game
+      ></app-player-in-game>
+    }
+    `,
     standalone: false
 })
 export class PlayerComponent implements OnInit {

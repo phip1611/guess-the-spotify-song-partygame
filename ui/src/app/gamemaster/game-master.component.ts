@@ -6,15 +6,21 @@ import { CommonClientService } from '../common/common-client.service';
 @Component({
     selector: 'app-game-master',
     template: `
-    <app-gm-create-new-game *ngIf="state === 0"
-                            (done)="onNewGameCreated()"
-    ></app-gm-create-new-game>
-    <app-gm-show-link *ngIf="state === 1"
-                      (done)="onGameStarted()"
-    ></app-gm-show-link>
-    <app-gm-in-game *ngIf="state === 2"
-    ></app-gm-in-game>
-  `,
+    @if (state === 0) {
+      <app-gm-create-new-game
+        (done)="onNewGameCreated()"
+      ></app-gm-create-new-game>
+    }
+    @if (state === 1) {
+      <app-gm-show-link
+        (done)="onGameStarted()"
+      ></app-gm-show-link>
+    }
+    @if (state === 2) {
+      <app-gm-in-game
+      ></app-gm-in-game>
+    }
+    `,
     standalone: false
 })
 export class GameMasterComponent implements OnInit, OnDestroy {

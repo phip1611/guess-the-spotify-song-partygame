@@ -4,15 +4,19 @@ import { PlayerBuzzerTimesType } from '../in-game.component';
 @Component({
     selector: 'app-player-buzzer-times',
     template: `
-    <mat-card *ngIf="times.length">
-      <mat-list>
-        <ng-container *ngFor="let e of times; let i = index">
-          <mat-list-item>{{e.playerName}} - {{e.seconds}}s</mat-list-item>
-          <mat-divider *ngIf="i < times.length - 1"></mat-divider>
-        </ng-container>
-      </mat-list>
-    </mat-card>
-  `,
+    @if (times.length) {
+      <mat-card>
+        <mat-list>
+          @for (e of times; track e; let i = $index) {
+            <mat-list-item>{{e.playerName}} - {{e.seconds}}s</mat-list-item>
+            @if (i < times.length - 1) {
+              <mat-divider></mat-divider>
+            }
+          }
+        </mat-list>
+      </mat-card>
+    }
+    `,
     standalone: false
 })
 export class PlayerBuzzerTimesComponent {

@@ -9,41 +9,45 @@ import { CommonClientService } from '../../common/common-client.service';
 @Component({
     selector: 'app-gm-create-new-game',
     template: `
-    <ng-container *ngIf="!spotifyService.isConnected()">
+    @if (!spotifyService.isConnected()) {
       <mat-card>
         <div class="d-flex justify-content-center">
           <button mat-raised-button color="primary" (click)="onConnect()"
-          >
+            >
             <mat-icon>music_note</mat-icon>
             Bei Spotify einloggen
           </button>
         </div>
       </mat-card>
-    </ng-container>
-
-    <mat-card *ngIf="spotifyService.isConnected()">
-      <div class="row">
-        <div class="col-2 col-lg-1 mt-3 text-center">
-          <mat-icon>link</mat-icon>
+    }
+    
+    @if (spotifyService.isConnected()) {
+      <mat-card>
+        <div class="row">
+          <div class="col-2 col-lg-1 mt-3 text-center">
+            <mat-icon>link</mat-icon>
+          </div>
+          <div class="col-10 col-lg-11">
+            @if (form) {
+              <form [formGroup]="form">
+                <mat-form-field class="w-100">
+                  <input matInput placeholder="Spotify-Playlist" formControlName="spotifyPlaylist">
+                  <mat-hint align="start">ID, Spotify-Link (spotify:playlist:) oder HTTPS</mat-hint>
+                </mat-form-field>
+              </form>
+            }
+          </div>
+          <div class="col-12 mt-3">
+            <button [disabled]="!form.valid"
+              class="w-100" mat-raised-button color="primary" (click)="startGame()">
+              Neues Spiel starten
+            </button>
+          </div>
         </div>
-        <div class="col-10 col-lg-11">
-          <form *ngIf="form" [formGroup]="form">
-            <mat-form-field class="w-100">
-              <input matInput placeholder="Spotify-Playlist" formControlName="spotifyPlaylist">
-              <mat-hint align="start">ID, Spotify-Link (spotify:playlist:) oder HTTPS</mat-hint>
-            </mat-form-field>
-          </form>
-        </div>
-        <div class="col-12 mt-3">
-          <button [disabled]="!form.valid"
-                  class="w-100" mat-raised-button color="primary" (click)="startGame()">
-            Neues Spiel starten
-          </button>
-        </div>
-      </div>
-    </mat-card>
-
-  `,
+      </mat-card>
+    }
+    
+    `,
     standalone: false
 })
 export class CreateNewGameComponent implements OnInit {

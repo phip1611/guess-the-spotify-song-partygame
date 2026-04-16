@@ -17,22 +17,26 @@ import { CommonClientService } from '../../common/common-client.service';
           {{joinGameUrl}}
         </mat-chip>
       </mat-chip-list>
-
-      <ng-container *ngIf="player.length">
+    
+      @if (player.length) {
         <p class="mt-3">Folgende Spieler sind beigetreten:</p>
         <mat-chip-list>
-          <mat-chip *ngFor="let player of player">
-            {{ player }}
-          </mat-chip>
+          @for (player of player; track player) {
+            <mat-chip>
+              {{ player }}
+            </mat-chip>
+          }
         </mat-chip-list>
         <div class="d-flex justify-content-end">
-          <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
-                  *ngIf="player.length >= 2">Spiel starten
-          </button>
+          @if (player.length >= 2) {
+            <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
+              >Spiel starten
+            </button>
+          }
         </div>
-      </ng-container>
+      }
     </mat-card>
-  `,
+    `,
     standalone: false
 })
 export class ShowLinkComponent implements OnInit, OnDestroy {

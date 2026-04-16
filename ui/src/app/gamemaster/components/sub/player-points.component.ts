@@ -7,7 +7,7 @@ import { GameMasterService, PointsPerPlayerType } from '../../game-master.servic
     selector: 'app-player-points',
     template: `
     <mat-list>
-      <ng-container *ngFor="let player of playerPoints; let i = index">
+      @for (player of playerPoints; track player; let i = $index) {
         <mat-list-item>
           <!-- controls rechts -->
           <div class="d-flex w-100 justify-content-between">
@@ -25,10 +25,12 @@ import { GameMasterService, PointsPerPlayerType } from '../../game-master.servic
             </div>
           </div>
         </mat-list-item>
-        <mat-divider *ngIf="i < playerPoints.length - 1"></mat-divider>
-      </ng-container>
+        @if (i < playerPoints.length - 1) {
+          <mat-divider></mat-divider>
+        }
+      }
     </mat-list>
-  `,
+    `,
     standalone: false
 })
 export class PlayerPointsComponent implements OnInit {

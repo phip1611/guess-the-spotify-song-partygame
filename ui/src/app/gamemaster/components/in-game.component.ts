@@ -13,60 +13,67 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
     template: `
     <div class="mb-3">
       <!-- if content is higher than display to have a margin at the bottom -->
-
+    
       <mat-card>
         <div class="row">
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="!playback?.playedOnce"
-                    mat-raised-button color="accent"
-                    (click)="showSolution = !showSolution; solutionShowedOnce = true">
+              [disabled]="!playback?.playedOnce"
+              mat-raised-button color="accent"
+              (click)="showSolution = !showSolution; solutionShowedOnce = true">
               Lösung
             </button>
           </div>
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="playback?.isPlaying"
-                    mat-raised-button color="warn"
-                    (click)="onPlaySong()">
+              [disabled]="playback?.isPlaying"
+              mat-raised-button color="warn"
+              (click)="onPlaySong()">
               Song abspielen
             </button>
           </div>
           <div class="col-12 col-md-4 mt-2 mt-md-0">
-            <button *ngIf="gameMasterService.hasMoreSongs()" class="w-100"
-                    [disabled]="!playback?.playedOnce || !solutionShowedOnce"
-                    mat-raised-button color="primary"
-                    (click)="onNextRound()">
-              Nächste Runde
-            </button>
-            <button *ngIf="!gameMasterService.hasMoreSongs()" class="w-100"
-                    [disabled]="true" mat-raised-button>
-              Spiel vorbei :)
-            </button>
+            @if (gameMasterService.hasMoreSongs()) {
+              <button class="w-100"
+                [disabled]="!playback?.playedOnce || !solutionShowedOnce"
+                mat-raised-button color="primary"
+                (click)="onNextRound()">
+                Nächste Runde
+              </button>
+            }
+            @if (!gameMasterService.hasMoreSongs()) {
+              <button class="w-100"
+                [disabled]="true" mat-raised-button>
+                Spiel vorbei :)
+              </button>
+            }
           </div>
         </div>
       </mat-card>
-
+    
       <!-- solution and player buzzer times on same row -->
       <div class="row mt-3">
-        <ng-container *ngIf="!showSolution && !buzzerTimeByPlayerName.length">
+        @if (!showSolution && !buzzerTimeByPlayerName.length) {
           <div class="col-12 offset-0 col-lg-8 offset-lg-2">
             <app-player-points></app-player-points>
           </div>
-        </ng-container>
-
-        <ng-container
-          *ngIf="showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length">
+        }
+    
+        @if (showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length) {
           <div class="col-12 offset-0 col-lg-8 offset-lg-2">
-            <app-spotify-songcard *ngIf="showSolution" [playback]="playback"></app-spotify-songcard>
-            <app-player-buzzer-times *ngIf="buzzerTimeByPlayerName.length"
-                                     [times]="buzzerTimeByPlayerName"
-            ></app-player-buzzer-times>
+            @if (showSolution) {
+              <app-spotify-songcard [playback]="playback"></app-spotify-songcard>
+            }
+            @if (buzzerTimeByPlayerName.length) {
+              <app-player-buzzer-times
+                [times]="buzzerTimeByPlayerName"
+              ></app-player-buzzer-times>
+            }
             <app-player-points class="mt-3"></app-player-points>
           </div>
-        </ng-container>
-
-        <ng-container *ngIf="showSolution && buzzerTimeByPlayerName.length">
+        }
+    
+        @if (showSolution && buzzerTimeByPlayerName.length) {
           <div class="col-12 mb-3 col-lg-6 mb-lg-0">
             <app-spotify-songcard
               [playback]="playback"
@@ -76,10 +83,10 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
             <app-player-buzzer-times [times]="buzzerTimeByPlayerName"></app-player-buzzer-times>
             <app-player-points class="mt-3"></app-player-points>
           </div>
-        </ng-container>
+        }
       </div>
     </div>
-  `,
+    `,
     standalone: false
 })
 export class InGameComponent implements OnInit {
