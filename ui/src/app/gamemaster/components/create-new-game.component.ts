@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
 import { SpotifyApiService } from '../../common/spotify-api.service';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonClientService } from '../../common/common-client.service';
@@ -49,7 +49,7 @@ export class CreateNewGameComponent implements OnInit {
 
   private static readonly LOGGER = new Log(CreateNewGameComponent.name);
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   @Output()
   done = new EventEmitter();
@@ -57,7 +57,7 @@ export class CreateNewGameComponent implements OnInit {
   constructor(public spotifyService: SpotifyApiService,
               private clientService: CommonClientService,
               private gameMasterService: GameMasterService,
-              private fb: FormBuilder) {
+              private fb: UntypedFormBuilder) {
   }
 
   ngOnInit(): void {

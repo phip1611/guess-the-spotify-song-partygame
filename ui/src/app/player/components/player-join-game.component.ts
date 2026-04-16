@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Log } from 'ng-log';
 import { SocketService } from '../../common/socket.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
 import { PlayerService } from '../player.service';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
@@ -46,7 +46,7 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(PlayerJoinGameComponent.name);
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   joined = false;
 
@@ -56,7 +56,7 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   done = new EventEmitter();
 
   constructor(private socketService: SocketService,
-              private fb: FormBuilder,
+              private fb: UntypedFormBuilder,
               private playerService: PlayerService) {
   }
 
