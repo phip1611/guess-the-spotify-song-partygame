@@ -1,4 +1,4 @@
-import * as socketIoClient from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { SocketEventType } from '../../common-ts/socket-events';
 import { AppServer } from './app-server';
 import { GameService } from './game.service';
@@ -17,7 +17,7 @@ beforeAll(() => {
 
 
 const newIoSocket = () => {
-    return socketIoClient('http://localhost:' + TEST_PORT, {
+    return io('http://localhost:' + TEST_PORT, {
         reconnectionDelay: 0,
         forceNew: true,
         transports: ['websocket']
@@ -25,9 +25,9 @@ const newIoSocket = () => {
 };
 
 const GAME_ID: GameId = 'abc';
-let gameMaster: SocketIOClient.Socket;
-let player1: SocketIOClient.Socket;
-let player2: SocketIOClient.Socket;
+let gameMaster: Socket;
+let player1: Socket;
+let player2: Socket;
 
 beforeEach(async () => {
     gameMaster = newIoSocket();
@@ -39,9 +39,9 @@ beforeEach(async () => {
 
 afterEach(() => {
     GameService.getInstance().reset();
-    if (gameMaster.connected) gameMaster.disconnect();
-    if (player1.connected) player1.disconnect();
-    if (player2.connected) player2.disconnect();
+    if (gameMaster?.connected) gameMaster.disconnect();
+    if (player1?.connected) player1.disconnect();
+    if (player2?.connected) player2.disconnect();
 });
 
 /**
@@ -120,10 +120,10 @@ test('play game with soft reset', async () => {
     player1.emit(SocketEventType.PLAYER_RECONNECT, player1Uuid);
     await expect(receiveEvent(player1, SocketEventType.SERVER_CONFIRM)).resolves.toBe(player1Uuid);
     expect(getGame().playersConnected.length).toBe(2);
-    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socket.connected).toBeTruthy();
-    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socketIoClientId).toBe(player1.id);
-    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socket.connected).toBeTruthy();
-    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socketIoClientId).toBe(player2.id);
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid)!.socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid)!.socketIoClientId).toBe(player1.id);
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid)!.socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid)!.socketIoClientId).toBe(player2.id);
 
     // play a few rounds
     for (let i = 0; i < 50; i++) {
@@ -144,9 +144,9 @@ test('play game with hard reset', async () => {
     player2.disconnect();
 
     // pretend we refreshed the tab
-    const newGameMaster: SocketIOClient.Socket = newIoSocket();
-    const newPlayer1: SocketIOClient.Socket = newIoSocket();
-    const newPlayer2: SocketIOClient.Socket = newIoSocket();
+    const newGameMaster: Socket = newIoSocket();
+    const newPlayer1: Socket = newIoSocket();
+    const newPlayer2: Socket = newIoSocket();
 
     newGameMaster.once('disconnect', () => {
         throw new Error('newGameMaster disconnected early!');
@@ -179,10 +179,10 @@ test('play game with hard reset', async () => {
 
     expect(getGame().playersConnected.length).toBe(2);
     expect(getGame().players.filter(c => c.dead).length).toBe(0);
-    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socket.connected).toBeTruthy();
-    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid).socketIoClientId).toBe(newPlayer1.id);
-    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socket.connected).toBeTruthy();
-    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid).socketIoClientId).toBe(newPlayer2.id);
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid)!.socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player1Uuid)!.socketIoClientId).toBe(newPlayer1.id);
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid)!.socket.connected).toBeTruthy();
+    expect(getGame().playersConnected.find(p => p.uuid === player2Uuid)!.socketIoClientId).toBe(newPlayer2.id);
 
     for (let i = 0; i < 50; i++) {
         await _playGameRoundWithSockets(newGameMaster, newPlayer1, newPlayer2);
@@ -238,7 +238,7 @@ async function _playGameRound(): Promise<void> {
 /**
  * Like {@link _playGameRound} but sockets to be used can be specified.
  */
-async function _playGameRoundWithSockets(gmSocket: SocketIOClient.Socket, player1Socket: SocketIOClient.Socket, player2Socket: SocketIOClient.Socket): Promise<void> {
+async function _playGameRoundWithSockets(gmSocket: Socket, player1Socket: Socket, player2Socket: Socket): Promise<void> {
     gmSocket.emit(SocketEventType.GM_START_NEXT_ROUND);
     await Promise.all([
         receiveEvent(player1Socket, SocketEventType.GM_START_NEXT_ROUND),
@@ -259,7 +259,7 @@ async function _playGameRoundWithSockets(gmSocket: SocketIOClient.Socket, player
 }
 
 
-async function receiveEvent<T>(socket: SocketIOClient.Socket, type: SocketEventType | string): Promise<T> {
+async function receiveEvent<T>(socket: Socket, type: SocketEventType | string): Promise<T> {
     return new Promise((resolve) => {
         socket.once(type, (val: T) => resolve(val));
     });
@@ -269,14 +269,14 @@ async function receiveEvent<T>(socket: SocketIOClient.Socket, type: SocketEventT
  * Use this when you expect multiple events of the same type during the next time period.
  * Removes all listeners of 'type' afterwards.
  */
-async function receiveEvents<T>(socket: SocketIOClient.Socket, type: SocketEventType | string, count: number): Promise<T[]> {
+async function receiveEvents<T>(socket: Socket, type: SocketEventType | string, count: number): Promise<T[]> {
     return new Promise((resolve) => {
         let i = 0;
-        const data = [];
-        socket.on(type, (rec) => {
+        const data: T[] = [];
+        socket.on(type, (rec: T) => {
             i++;
             if (i === count) {
-                socket.removeListener(type);
+                socket.removeAllListeners(type);
                 resolve(data);
             }
             data.push(rec);
@@ -293,5 +293,5 @@ async function timeoutPromise(mseconds: number): Promise<void> {
 }
 
 function getGame(): Game {
-    return GameService.getInstance().gameIdToGameMap.get('abc');
+    return GameService.getInstance().gameIdToGameMap.get('abc')!;
 }

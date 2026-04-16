@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
     "incremental": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false,
     "target": "es2018",
     "module": "commonjs",
+    "ignoreDeprecations": "6.0",
+    "rootDir": "..",
     "baseUrl": "./",
     "outDir": "build",
     "removeComments": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
-    "importHelpers": true,
+    "importHelpers": false,
     "types": [
       "node",
-      "socket.io",
-      "socket.io-client",
       "express",
       "jest"
     ],
