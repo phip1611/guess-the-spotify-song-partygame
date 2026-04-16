@@ -25,7 +25,7 @@ export class AppSocket extends Socket {
         reconnectionDelay: 10,
         reconnectionDelayMax: 500,
         timeout: 100,
-      }
+      } as any
     });
 
     if (!environment.production) {
