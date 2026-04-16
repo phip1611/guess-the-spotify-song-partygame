@@ -4,8 +4,9 @@ import { Log } from 'ng-log';
 import { SpotifyApiService } from '../common/spotify-api.service';
 
 @Component({
-  selector: 'app-spotify-redirect',
-  template: ``
+    selector: 'app-spotify-redirect',
+    template: ``,
+    standalone: false
 })
 export class SpotifyRedirectComponent implements OnInit, OnDestroy {
 

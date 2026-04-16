@@ -8,8 +8,8 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
-  selector: 'app-gm-show-link',
-  template: `
+    selector: 'app-gm-show-link',
+    template: `
     <mat-card>
       <p>Teile diesen Link mit deinen Freunden, damit sie dem Spiel beitreten können:</p>
       <mat-chip-list>
@@ -32,7 +32,8 @@ import { CommonClientService } from '../../common/common-client.service';
         </div>
       </ng-container>
     </mat-card>
-  `
+  `,
+    standalone: false
 })
 export class ShowLinkComponent implements OnInit, OnDestroy {
 

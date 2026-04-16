@@ -9,8 +9,8 @@ import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 
 @Component({
-  selector: 'app-gm-in-game',
-  template: `
+    selector: 'app-gm-in-game',
+    template: `
     <div class="mb-3">
       <!-- if content is higher than display to have a margin at the bottom -->
 
@@ -79,7 +79,8 @@ export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
         </ng-container>
       </div>
     </div>
-  `
+  `,
+    standalone: false
 })
 export class InGameComponent implements OnInit {
 

@@ -7,8 +7,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
-  selector: 'app-gm-create-new-game',
-  template: `
+    selector: 'app-gm-create-new-game',
+    template: `
     <ng-container *ngIf="!spotifyService.isConnected()">
       <mat-card>
         <div class="d-flex justify-content-center">
@@ -43,7 +43,8 @@ import { CommonClientService } from '../../common/common-client.service';
       </div>
     </mat-card>
 
-  `
+  `,
+    standalone: false
 })
 export class CreateNewGameComponent implements OnInit {
 

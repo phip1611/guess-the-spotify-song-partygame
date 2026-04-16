@@ -4,8 +4,8 @@ import { SocketService } from '../common/socket.service';
 import { CommonClientService } from '../common/common-client.service';
 
 @Component({
-  selector: 'app-game-master',
-  template: `
+    selector: 'app-game-master',
+    template: `
     <app-gm-create-new-game *ngIf="state === 0"
                             (done)="onNewGameCreated()"
     ></app-gm-create-new-game>
@@ -14,7 +14,8 @@ import { CommonClientService } from '../common/common-client.service';
     ></app-gm-show-link>
     <app-gm-in-game *ngIf="state === 2"
     ></app-gm-in-game>
-  `
+  `,
+    standalone: false
 })
 export class GameMasterComponent implements OnInit, OnDestroy {
 

@@ -7,8 +7,8 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { AppSocket } from '../../common/app-socket.service';
 
 @Component({
-  selector: 'app-player-in-game',
-  template: `
+    selector: 'app-player-in-game',
+    template: `
     <mat-card>
       <p class="text-center">Bitte während des Spiels nicht zwischen WLAN und mobilem Internet wechseln!</p>
     </mat-card>
@@ -21,7 +21,8 @@ import { AppSocket } from '../../common/app-socket.service';
       >BUZZER
       </button>
     </mat-card>
-  `
+  `,
+    standalone: false
 })
 export class PlayerInGameComponent implements OnInit, OnDestroy {
 

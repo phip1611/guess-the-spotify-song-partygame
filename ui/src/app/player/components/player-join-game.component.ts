@@ -7,8 +7,8 @@ import { PlayerService } from '../player.service';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 
 @Component({
-  selector: 'app-player-join-game',
-  template: `
+    selector: 'app-player-join-game',
+    template: `
     <mat-card *ngIf="!joined">
       <form *ngIf="form" [formGroup]="form">
         <div class="row">
@@ -40,7 +40,8 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
         </div>
       </div>
     </mat-card>
-  `
+  `,
+    standalone: false
 })
 export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 

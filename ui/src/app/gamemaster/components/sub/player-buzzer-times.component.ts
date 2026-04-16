@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { PlayerBuzzerTimesType } from '../in-game.component';
 
 @Component({
-  selector: 'app-player-buzzer-times',
-  template: `
+    selector: 'app-player-buzzer-times',
+    template: `
     <mat-card *ngIf="times.length">
       <mat-list>
         <ng-container *ngFor="let e of times; let i = index">
@@ -12,7 +12,8 @@ import { PlayerBuzzerTimesType } from '../in-game.component';
         </ng-container>
       </mat-list>
     </mat-card>
-  `
+  `,
+    standalone: false
 })
 export class PlayerBuzzerTimesComponent {
 
