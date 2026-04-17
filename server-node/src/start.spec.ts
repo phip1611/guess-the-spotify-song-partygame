@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { io, Socket } from 'socket.io-client';
 import { SocketEventType } from '../../common-ts/socket-events.js';
 import { AppServer } from './app-server.js';
@@ -6,6 +7,9 @@ import { Game, GameId } from './game.js';
 import { ClientUuid } from './client.js';
 
 const TEST_PORT = 63246;
+const SOCKET_CLEANUP_TIMEOUT_MS = 500;
+
+jest.setTimeout(20000);
 
 beforeAll(() => {
     const appServer = AppServer.getInstance();
@@ -17,19 +21,23 @@ beforeAll(() => {
 
 
 const newIoSocket = () => {
-    return io('http://localhost:' + TEST_PORT, {
+    const socket = io('http://localhost:' + TEST_PORT, {
         reconnectionDelay: 0,
         forceNew: true,
         transports: ['websocket']
     });
+    testSockets.push(socket);
+    return socket;
 };
 
 const GAME_ID: GameId = 'abc';
 let gameMaster: Socket;
 let player1: Socket;
 let player2: Socket;
+let testSockets: Socket[] = [];
 
 beforeEach(async () => {
+    testSockets = [];
     gameMaster = newIoSocket();
     player1 = newIoSocket();
     player2 = newIoSocket();
@@ -37,18 +45,19 @@ beforeEach(async () => {
 });
 
 
-afterEach(() => {
+afterEach(async () => {
+    await Promise.all(testSockets.map(closeSocket));
+    await waitFor(() => GameService.getInstance().socketIoClientIdToClientMap.size === 0, SOCKET_CLEANUP_TIMEOUT_MS);
     GameService.getInstance().reset();
-    if (gameMaster?.connected) gameMaster.disconnect();
-    if (player1?.connected) player1.disconnect();
-    if (player2?.connected) player2.disconnect();
+    testSockets = [];
 });
 
 /**
  *  Cleanup WS & HTTP servers
  */
-afterAll(() => {
-    AppServer.getInstance().close();
+afterAll(async () => {
+    GameService.getInstance().close();
+    await AppServer.getInstance().close();
 });
 
 test('play game regular', async () => {
@@ -58,12 +67,8 @@ test('play game regular', async () => {
     }
 
     // check state on server
-    gameMaster.disconnect();
-    player1.disconnect();
-    player2.disconnect();
-
-    // make sure disconnects reach server
-    await timeoutPromise(50);
+    await Promise.all([closeSocket(gameMaster), closeSocket(player1), closeSocket(player2)]);
+    await waitFor(() => GameService.getInstance().socketIoClientIdToClientMap.size === 0, SOCKET_CLEANUP_TIMEOUT_MS);
 
     const games = Array.from(GameService.getInstance().gameIdToGameMap.values());
     games.forEach(game => {
@@ -111,10 +116,10 @@ test('play game with soft reset', async () => {
 
     // now just reconnect one player again
     // and check
-    player1.disconnect();
+    await closeSocket(player1);
     player1.connect();
 
-    await timeoutPromise(10); // time to disconnect on server
+    await waitFor(() => getGame().playersConnected.length === 1, SOCKET_CLEANUP_TIMEOUT_MS);
     expect(getGame().playersConnected.length).toBe(1);
 
     player1.emit(SocketEventType.PLAYER_RECONNECT, player1Uuid);
@@ -139,9 +144,7 @@ test('play game with hard reset', async () => {
 
     // now test reconnect
 
-    gameMaster.disconnect();
-    player1.disconnect();
-    player2.disconnect();
+    await Promise.all([closeSocket(gameMaster), closeSocket(player1), closeSocket(player2)]);
 
     // pretend we refreshed the tab
     const newGameMaster: Socket = newIoSocket();
@@ -194,6 +197,46 @@ test('play game with hard reset', async () => {
     newPlayer1.removeAllListeners();
     newPlayer2.removeAllListeners();
 
+});
+
+test('rejects player hello for unknown game without attaching forwarders', async () => {
+    const strayPlayer = newIoSocket();
+    await receiveEvent(strayPlayer, 'connect');
+
+    strayPlayer.emit(SocketEventType.PLAYER_HELLO, 'missing');
+    await expectNoEvent(strayPlayer, SocketEventType.SERVER_CONFIRM, 100);
+
+    const spy = jest.fn();
+    gameMaster.on(SocketEventType.PLAYER_BUZZER, spy);
+    strayPlayer.emit(SocketEventType.PLAYER_BUZZER, 'STRAY_PLAYER');
+    await timeoutPromise(50);
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(GameService.getInstance().socketIoClientIdToClientMap.size).toBe(0);
+
+    await closeSocket(strayPlayer);
+    gameMaster.removeListener(SocketEventType.PLAYER_BUZZER, spy);
+});
+
+test('rejects reconnect with unknown uuid without attaching forwarders', async () => {
+    const strayPlayer = newIoSocket();
+    await receiveEvent(strayPlayer, 'connect');
+
+    strayPlayer.emit(SocketEventType.PLAYER_RECONNECT, 'missing-uuid');
+    await expectNoEvent(strayPlayer, SocketEventType.SERVER_CONFIRM, 100);
+
+    const spy = jest.fn();
+    gameMaster.on(SocketEventType.PLAYER_REGISTER, spy);
+    strayPlayer.emit(SocketEventType.PLAYER_REGISTER, 'STRAY_PLAYER');
+    await timeoutPromise(50);
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(GameService.getInstance().clientUuidMap.has('missing-uuid')).toBeFalsy();
+
+    await closeSocket(strayPlayer);
+    await waitFor(() => GameService.getInstance().socketIoClientIdToClientMap.size === 0, SOCKET_CLEANUP_TIMEOUT_MS);
+
+    gameMaster.removeListener(SocketEventType.PLAYER_REGISTER, spy);
 });
 
 /**
@@ -265,6 +308,46 @@ async function receiveEvent<T>(socket: Socket, type: SocketEventType | string): 
     });
 }
 
+async function expectNoEvent(socket: Socket, type: SocketEventType | string, timeoutMs: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            socket.removeListener(type, onEvent);
+            resolve();
+        }, timeoutMs);
+
+        const onEvent = (value: unknown) => {
+            clearTimeout(timer);
+            socket.removeListener(type, onEvent);
+            reject(new Error(`Unexpected event ${String(type)} with payload ${JSON.stringify(value)}`));
+        };
+
+        socket.on(type, onEvent);
+    });
+}
+
+async function closeSocket(socket: Socket | undefined): Promise<void> {
+    if (!socket || !socket.connected) {
+        return;
+    }
+
+    await new Promise<void>((resolve) => {
+        socket.once('disconnect', () => resolve());
+        socket.disconnect();
+    });
+}
+
+async function waitFor(predicate: () => boolean, timeoutMs: number, pollMs = 10): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        if (predicate()) {
+            return;
+        }
+        await timeoutPromise(pollMs);
+    }
+
+    throw new Error(`Condition not met within ${timeoutMs}ms`);
+}
+
 /**
  * Use this when you expect multiple events of the same type during the next time period.
  * Removes all listeners of 'type' afterwards.
@@ -291,6 +374,7 @@ async function timeoutPromise(mseconds: number): Promise<void> {
         setTimeout(() => resolve(), mseconds);
     });
 }
+
 
 function getGame(): Game {
     return GameService.getInstance().gameIdToGameMap.get('abc')!;

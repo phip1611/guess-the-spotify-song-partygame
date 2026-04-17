@@ -39,6 +39,8 @@ export class GameService {
 
     private initDone: boolean = false;
 
+    private removalInterval?: NodeJS.Timeout;
+
     private constructor() {
     }
 
@@ -273,18 +275,17 @@ export class GameService {
 
     private setUpRemovalOfOldGamesInterval() {
         const limit = 1000 * 60 * 60 * 2; // two hours in milli seconds
-        const that = this;
-        setInterval(() => this.removalOfOldGames(that), limit)
+        this.removalInterval = setInterval(() => this.removalOfOldGames(), limit);
     }
 
-    private removalOfOldGames(context: GameService) {
+    private removalOfOldGames() {
         Log.log('removing old gameIdToGameMap now');
-        if (context.gameIdToGameMap.size === 0) { return; }
+        if (this.gameIdToGameMap.size === 0) { return; }
         const limit = 1000 * 60 * 60 * 2; // two hours in milli seconds
         const currentTime = new Date().getTime();
         const idsToRemove = [];
 
-        Array.from(context.gameIdToGameMap.values()).forEach((game) => {
+        Array.from(this.gameIdToGameMap.values()).forEach((game) => {
             if (currentTime - game.started.getTime() > limit) {
                 Log.log(`removing game '${game.id}'`);
                 idsToRemove.push(game.id);
@@ -292,25 +293,25 @@ export class GameService {
         });
 
         idsToRemove.forEach(id => {
-            const game = context.gameIdToGameMap.get(id);
+            const game = this.gameIdToGameMap.get(id);
             if (!game || game.gameMaster.dead) {
                 if (game) {
-                    context.clientUuidMap.delete(game.gameMaster.uuid);
-                    game.players.forEach(p => context.clientUuidMap.delete(p.uuid));
+                    this.clientUuidMap.delete(game.gameMaster.uuid);
+                    game.players.forEach(p => this.clientUuidMap.delete(p.uuid));
                 }
-                context.gameIdToGameMap.delete(id);
+                this.gameIdToGameMap.delete(id);
                 return;
             }
 
             game.gameMaster.socket.disconnect(true);
-            context.clientUuidMap.delete(game.gameMaster.uuid);
+            this.clientUuidMap.delete(game.gameMaster.uuid);
             game.players.forEach(p => {
                 if (!p.dead) {
                     p.disconnect();
                 }
-                context.clientUuidMap.delete(p.uuid);
+                this.clientUuidMap.delete(p.uuid);
             });
-            context.gameIdToGameMap.delete(id);
+            this.gameIdToGameMap.delete(id);
         });
     }
 
@@ -331,5 +332,14 @@ export class GameService {
         this._gameIdToGameMap.clear();
         this._clientUuidMap.clear();
         this._socketIoClientIdToClientMap.clear();
+    }
+
+    close() {
+        if (this.removalInterval) {
+            clearInterval(this.removalInterval);
+            this.removalInterval = undefined;
+        }
+        this.reset();
+        this.initDone = false;
     }
 }

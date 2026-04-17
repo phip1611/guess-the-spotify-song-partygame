@@ -9,8 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "nodemon --config ./nodemon.config.json",
     "start:prod": "node build/server-node/src/start.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false",
-    "test-w": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false --watch"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false --runInBand",
+    "test-w": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false --watch --runInBand"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

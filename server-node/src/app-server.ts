@@ -77,8 +77,17 @@ export class AppServer {
         });
     }
 
-    public close() {
+    public async close(): Promise<void> {
         this.socketIo.close();
-        this.httpServer.close();
+        await new Promise<void>((resolve, reject) => {
+            this.httpServer.close((error) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve();
+            });
+        });
+        this.initDone = false;
     }
 }
