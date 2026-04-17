@@ -1,22 +1,21 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
-import { SocketService } from '../common/socket.service';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Log } from '../common/logging/logger';
 import { CommonClientService } from '../common/common-client.service';
 
 @Component({
     selector: 'app-game-master',
     template: `
-    @if (state === 0) {
+    @if (state() === 0) {
       <app-gm-create-new-game
         (done)="onNewGameCreated()"
       ></app-gm-create-new-game>
     }
-    @if (state === 1) {
+    @if (state() === 1) {
       <app-gm-show-link
         (done)="onGameStarted()"
       ></app-gm-show-link>
     }
-    @if (state === 2) {
+    @if (state() === 2) {
       <app-gm-in-game
       ></app-gm-in-game>
     }
@@ -27,7 +26,7 @@ export class GameMasterComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(GameMasterComponent.name);
 
-  public state: GameMasterState = GameMasterState.CREATE_GAME;
+  readonly state = signal(GameMasterState.CREATE_GAME);
 
   constructor(private clientService: CommonClientService) {
   }
@@ -40,12 +39,11 @@ export class GameMasterComponent implements OnInit, OnDestroy {
   }
 
   onNewGameCreated() {
-    // this.state += 1;
-    this.state = GameMasterState.INVITE_LINK;
+    this.state.set(GameMasterState.INVITE_LINK);
   }
 
   onGameStarted() {
-    this.state = GameMasterState.IN_GAME;
+    this.state.set(GameMasterState.IN_GAME);
   }
 }
 

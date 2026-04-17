@@ -1,6 +1,6 @@
 import { ApplicationRef, Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Log } from 'ng-log';
+import { Log } from './logging/logger';
 import { SOCKET_URL } from './config/urls';
 import { environment } from '../../environments/environment';
 

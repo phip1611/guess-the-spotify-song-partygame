@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Log } from '../../common/logging/logger';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
 import { PlayerService } from '../player.service';
@@ -16,7 +16,7 @@ import { AppSocket } from '../../common/app-socket.service';
     <mat-card class="mt-3">
       <button mat-raised-button color="warn" class="w-100"
               style="height: 450px; font-size: 36px"
-              [disabled]="!buzzerEnabled"
+              [disabled]="!buzzerEnabled()"
               (click)="onBuzzered()"
       >BUZZER
       </button>
@@ -28,7 +28,7 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(PlayerInGameComponent.name);
 
-  buzzerEnabled = false;
+  readonly buzzerEnabled = signal(false);
 
   private subs1: Subscription;
   private subs2: Subscription;
@@ -40,10 +40,10 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subs1 = this.socketService.getBuzzerEnabled().subscribe(() => {
-      this.buzzerEnabled = true;
+      this.buzzerEnabled.set(true);
     });
     this.subs2 = this.socketService.getNextRoundStarted().subscribe(() => {
-      this.buzzerEnabled = false;
+      this.buzzerEnabled.set(false);
     });
   }
 
@@ -58,6 +58,6 @@ export class PlayerInGameComponent implements OnInit, OnDestroy {
       payload: this.playerService.getPlayerName(),
       type: SocketEventType.PLAYER_BUZZER
     });
-    this.buzzerEnabled = false;
+    this.buzzerEnabled.set(false);
   }
 }

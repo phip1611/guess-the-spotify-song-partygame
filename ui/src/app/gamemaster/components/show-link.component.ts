@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from '../../common/logging/logger';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
@@ -18,17 +18,17 @@ import { CommonClientService } from '../../common/common-client.service';
         </mat-chip>
       </mat-chip-set>
     
-      @if (player.length) {
+      @if (players().length) {
         <p class="mt-3">Folgende Spieler sind beigetreten:</p>
         <mat-chip-set>
-          @for (player of player; track player) {
+          @for (player of players(); track player) {
             <mat-chip>
               {{ player }}
             </mat-chip>
           }
         </mat-chip-set>
         <div class="d-flex justify-content-end">
-          @if (player.length >= 2) {
+          @if (players().length >= 2) {
             <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
               >Spiel starten
             </button>
@@ -43,7 +43,7 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(ShowLinkComponent.name);
 
-  public player: string[] = [];
+  readonly players = this.gameMasterService.players;
 
   public joinGameUrl: string;
 
@@ -74,7 +74,6 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
     this.subscription = this.socketService.getPlayerRegistered().subscribe(playerId => {
       ShowLinkComponent.LOGGER.debug('Got signal from socket service that a players want to register');
       this.gameMasterService.addPlayer(playerId);
-      this.player = this.gameMasterService.getPlayers();
     });
   }
 

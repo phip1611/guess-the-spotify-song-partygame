@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from '../../common/logging/logger';
 import { SpotifyApiService } from '../../common/spotify-api.service';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';

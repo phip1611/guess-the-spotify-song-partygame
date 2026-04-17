@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
+import { Component, OnInit, signal } from '@angular/core';
+import { Log } from '../common/logging/logger';
 import { SocketService } from '../common/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { SocketEventType } from '../../../../common-ts/socket-events';
@@ -8,12 +8,12 @@ import { CommonClientService } from '../common/common-client.service';
 @Component({
     selector: 'app-player',
     template: `
-    @if (state === 0) {
+    @if (state() === 0) {
       <app-player-join-game
         (done)="onGameStarts()"
       ></app-player-join-game>
     }
-    @if (state === 1) {
+    @if (state() === 1) {
       <app-player-in-game
       ></app-player-in-game>
     }
@@ -24,7 +24,7 @@ export class PlayerComponent implements OnInit {
 
   private static readonly LOGGER = new Log(PlayerComponent.name);
 
-  state: PlayerState = PlayerState.JOIN_GAME;
+  readonly state = signal(PlayerState.JOIN_GAME);
 
   constructor(private socketService: SocketService,
               private route: ActivatedRoute,
@@ -51,11 +51,11 @@ export class PlayerComponent implements OnInit {
 
 
   onGameCreated() {
-    this.state = PlayerState.JOIN_GAME;
+    this.state.set(PlayerState.JOIN_GAME);
   }
 
   onGameStarts() {
-    this.state = PlayerState.IN_GAME;
+    this.state.set(PlayerState.IN_GAME);
   }
 }
 

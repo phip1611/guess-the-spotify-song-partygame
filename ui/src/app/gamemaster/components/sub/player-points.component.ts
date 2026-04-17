@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
-import { GameMasterService, PointsPerPlayerType } from '../../game-master.service';
+import { Log } from '../../../common/logging/logger';
+import { GameMasterService } from '../../game-master.service';
 
 
 @Component({
     selector: 'app-player-points',
     template: `
     <mat-list>
-      @for (player of playerPoints; track player; let i = $index) {
+      @for (player of playerPoints(); track player; let i = $index) {
         <mat-list-item>
           <!-- controls rechts -->
           <div class="d-flex w-100 justify-content-between">
@@ -25,7 +25,7 @@ import { GameMasterService, PointsPerPlayerType } from '../../game-master.servic
             </div>
           </div>
         </mat-list-item>
-        @if (i < playerPoints.length - 1) {
+        @if (i < playerPoints().length - 1) {
           <mat-divider></mat-divider>
         }
       }
@@ -37,14 +37,12 @@ export class PlayerPointsComponent implements OnInit {
 
   private static readonly LOGGER = new Log(PlayerPointsComponent.name);
 
-  playerPoints: PointsPerPlayerType = [];
+  readonly playerPoints = this.gameMasterService.pointsPerPlayer;
 
   constructor(private gameMasterService: GameMasterService) {
   }
 
-  ngOnInit(): void {
-    this.playerPoints = this.gameMasterService.getPointsPerPlayer();
-  }
+  ngOnInit(): void {}
 
   addPoint(index: number): void {
     this.gameMasterService.addPoint(index);

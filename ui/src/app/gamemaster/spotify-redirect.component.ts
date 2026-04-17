@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Log } from 'ng-log';
+import { Log } from '../common/logging/logger';
 import { SpotifyApiService } from '../common/spotify-api.service';
 
 @Component({

@@ -2,7 +2,7 @@
  * Holds the data that describes the state between the server and the client.
  */
 import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from './logging/logger';
 
 @Injectable({
   providedIn: 'root'

@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, signal } from '@angular/core';
+import { Log } from '../../common/logging/logger';
 import { SocketService } from '../../common/socket.service';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
 @Component({
     selector: 'app-player-join-game',
     template: `
-    @if (!joined) {
+    @if (!joined()) {
       <mat-card>
         @if (form) {
           <form [formGroup]="form">
@@ -32,9 +32,9 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
       </mat-card>
     }
     
-    @if (joined) {
+    @if (joined()) {
       <mat-card>
-        <h3 class="mt-3 text-center">{{playerName}} - Bitte warte, bis der Gamemaster das Spiel startet :)</h3>
+        <h3 class="mt-3 text-center">{{playerName()}} - Bitte warte, bis der Gamemaster das Spiel startet :)</h3>
         <div class="d-flex justify-content-center mt-3">
           <div class="lds-facebook">
             <div></div>
@@ -53,9 +53,9 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
   form: UntypedFormGroup;
 
-  joined = false;
+  readonly joined = signal(false);
 
-  playerName: string;
+  readonly playerName = signal('');
 
   @Output()
   done = new EventEmitter<void>();
@@ -75,13 +75,14 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   }
 
   doJoinGame(): void {
-    this.playerName = this.form.getRawValue().playerName;
-    this.playerService.setPlayerName(this.playerName);
+    const playerName = this.form.getRawValue().playerName;
+    this.playerName.set(playerName);
+    this.playerService.setPlayerName(playerName);
     this.socketService.sendMessage({
-      payload: this.playerName,
+      payload: playerName,
       type: SocketEventType.PLAYER_REGISTER
     });
-    this.joined = true;
+    this.joined.set(true);
 
     // wait until game round started
     this.socketService.getNextRoundStarted().pipe(take(1)).subscribe(

@@ -2,9 +2,6 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "paths": {
-      "ng-log": ["src/shims/ng-log"]
-    },
     "types": [
       "jasmine",
       "node"
