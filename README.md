@@ -1,61 +1,114 @@
-# Hackthon
+# Song Game
 
-## Idea + Concept
-A game with the spotify api. There is a game master that can set a set of songs
-in his web ui. Then he can invite players through a link. Hence, everything is a
-website/webapp. If all players joined the game master can start the game.
+A realtime party game built with Angular, Socket.IO, and the Spotify Web API.
 
-The game master plays the song on his device. From this moment the buzzer buttons
-in the web ui on the players devices will be enabled. The fastest player or team can 
-make their guess and the game master decides if its correct.
+One player acts as the game master, chooses a playlist, starts rounds, and awards points. Other players join from their phones and use a buzzer UI.
 
-The game master gives points to the team in his web ui.
+## Stack
 
-It's recommended to use a big screen 
-where the moderator can show the solutions, which players
-has the most points and so on :)
+- UI: Angular 21, Angular Material, Bootstrap 5, zoneless change detection, signals where practical
+- Backend: Node 24, Express 5, Socket.IO 4, TypeScript ESM
+- Shared protocol: `common-ts/socket-events.ts`
 
-## Learnings
-I learned how to work with Web Sockets (with socket.io).
-This was my first project with realtime functionality. Quite interesting stuff!
+## Prerequisites
 
+- Node `24.14.0`
+- npm
+- a Spotify app configuration that allows your local redirect URL, usually `http://localhost:4200/spotify-redirect`
 
-## Build + Run
-`$ sh build.sh`\
-`$ docker run -p 8080:8080 phip1611:guess-spotify-song-game`
+The repo pins Node in `.nvmrc`.
 
-# How to play
-Game master visits http://localhost:8080 (or https://domain.tld with reverse proxy)
-and starts the game. He should share his display with everyone
- for example on a big TV or a projector. An invitation link for other players will be generated
-that looks like this: http://localhost/game/123
+## Install
 
-The game master himself can participate the game as well if
-he joines in with another device.
+Install dependencies in both app folders:
 
-Giving points to the players is up to the game master.
+```bash
+cd ui && npm ci
+cd ../server-node && npm ci
+```
 
-The only functionality on the players devices is the buzzer button and
-of course the selection of a player name.
+## Local Development
 
-# Description of protocol between `game master - server`, `player - server`, and `game master <-via server-> player`.
-(See common-ts/socket-events.ts)
-## Server
-- listens on all new sockets for either `GM_CREATE_GAME(gameId: string)`, `PLAYER_HELLO(gameId: string)`, `PLAYER_RECONNECT(clientUuid: string)`, or `GM_RECONNECT(clientUuid: string)`
-- associates all this sockets a uuid and adds the socket to the sockets of a internal Game-object
-- returns `SERVER_CONFIRM(uuid: string)`
-- this uuid can be used for either `GM_RECONNECT(uuid: string)` or `PLAYER_RECONNECT(uuid: string)` so that
-  the sockets will be attached to the internal Game-object
-- server returns `SERVER_CONFIRM(uuid: string)` also after reconnects (with same uuid)
-- forward GM to Player: `GM_ENABLE_BUZZER()`, `GM_START_NEXT_ROUND
-- forward Player to GM: `PLAYER_REGISTER(userName: string)`, `PLAYER_BUZZER()`
-## Game master
-- Sends event `GM_CREATE_GAME(gameId: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
-- or sends `GM_RECONNECT(clientUuid: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
----
-- sends `GM_START_NEXT_ROUND()`, `GM_ENABLE_BUZZER()` ...
-## Player
-- Sends event `PLAYER_HELLO(gameId: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
-- or sends `PLAYER_RECONNECT(clientUuid: string)` and receives `SERVER_CONFIRM(clientUuid: string)`
-- if not done yet: sends `PLAYER_REGISTER(userName: string)` to game master
-- send `PLAYER_BUZZER()` again and again..
+Recommended full-stack workflow from the repo root:
+
+```bash
+npm run dev
+```
+
+This starts:
+
+- the backend on `http://localhost:8080`
+- the Angular dev server on `http://localhost:4200`
+
+The UI uses same-origin Socket.IO in the browser and proxies `/socket.io` and `/info` from the Angular dev server to the backend, so local browser traffic stays consistent.
+
+You can also run the services separately:
+
+```bash
+npm run dev:server
+npm run dev:ui
+```
+
+## Tests
+
+Run everything from the repo root:
+
+```bash
+npm test
+```
+
+Or individually:
+
+```bash
+npm run test:server
+npm run test:ui
+npm run typecheck:ui
+npm run build:server
+```
+
+## Production Build
+
+Backend build:
+
+```bash
+npm run build:server
+```
+
+UI production build:
+
+```bash
+npm run build:ui
+```
+
+The Angular production config disables remote font inlining so the build works in offline or sandboxed environments.
+
+## Docker
+
+Build the image:
+
+```bash
+npm run docker:build
+```
+
+Run it:
+
+```bash
+docker run --rm -p 8080:8080 song-game
+```
+
+The Docker image builds the Angular UI and backend in separate stages and serves the compiled UI from the backend.
+
+## Gameplay
+
+- Open `http://localhost:4200` during local development, or `http://localhost:8080` when running the built server/image.
+- The game master logs into Spotify and starts a game from a playlist.
+- Players join via `/game/:id`.
+- The server forwards:
+  - game master -> players: `GM_START_NEXT_ROUND`, `GM_ENABLE_BUZZER`
+  - players -> game master: `PLAYER_REGISTER`, `PLAYER_BUZZER`
+
+## Notes
+
+- The backend keeps reconnect metadata so clients can recover from temporary disconnects.
+- Spotify redirect and join URLs are derived from the current browser origin.
+- The `/info` endpoint exists for debugging and inspection.
