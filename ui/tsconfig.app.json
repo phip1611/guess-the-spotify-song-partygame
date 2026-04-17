@@ -5,7 +5,8 @@
     "types": [],
     "paths": {
       // https://stackoverflow.com/questions/58259660/how-to-avoid-module-not-found-error-cant-resolve-tslib-error-when-referen
-      "tslib": ["node_modules/tslib"]
+      "tslib": ["node_modules/tslib"],
+      "ng-log": ["src/shims/ng-log"]
     }
   },
   "files": [

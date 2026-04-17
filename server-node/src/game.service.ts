@@ -79,11 +79,10 @@ export class GameService {
 
             try {
                 this.addClientToGame(SocketEventType.GM_CREATE_GAME, socket, gameId, ClientType.GAME_MASTER);
+                this.setUpForwardGmSocketEventsHandler(socket, gameId);
             } catch (e) {
                 Log.error(e);
             }
-
-            this.setUpForwardGmSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -95,11 +94,10 @@ export class GameService {
 
             try {
                 this.addClientToGame(SocketEventType.PLAYER_HELLO, socket, gameId, ClientType.PLAYER);
+                this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
             } catch (e) {
                 Log.error(e);
             }
-
-            this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -108,14 +106,12 @@ export class GameService {
         socket.on(SocketEventType.GM_RECONNECT, (uuid: GmReconnectPayload) => {
             Log.eventReceived(SocketEventType.GM_RECONNECT, socket.id, uuid);
 
-            let gameId;
             try {
-                gameId = this.addClientToGame(SocketEventType.GM_RECONNECT, socket, uuid, ClientType.GAME_MASTER);
+                const gameId = this.addClientToGame(SocketEventType.GM_RECONNECT, socket, uuid, ClientType.GAME_MASTER);
+                this.setUpForwardGmSocketEventsHandler(socket, gameId);
             } catch (e) {
                 Log.error(e);
             }
-
-            this.setUpForwardGmSocketEventsHandler(socket, gameId);
         });
 
         /**
@@ -124,14 +120,12 @@ export class GameService {
         socket.on(SocketEventType.PLAYER_RECONNECT, (uuid: PlayerReconnectPayload) => {
             Log.eventReceived(SocketEventType.PLAYER_RECONNECT, socket.id, uuid);
 
-            let gameId;
             try {
-                gameId = this.addClientToGame(SocketEventType.PLAYER_RECONNECT, socket, uuid, ClientType.PLAYER);
+                const gameId = this.addClientToGame(SocketEventType.PLAYER_RECONNECT, socket, uuid, ClientType.PLAYER);
+                this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
             } catch (e) {
                 Log.error(e);
             }
-
-            this.setUpForwardPlayerSocketEventsHandler(socket, gameId);
         });
 
         // socket.on('disconnect', reason => {
@@ -299,10 +293,21 @@ export class GameService {
 
         idsToRemove.forEach(id => {
             const game = context.gameIdToGameMap.get(id);
+            if (!game || game.gameMaster.dead) {
+                if (game) {
+                    context.clientUuidMap.delete(game.gameMaster.uuid);
+                    game.players.forEach(p => context.clientUuidMap.delete(p.uuid));
+                }
+                context.gameIdToGameMap.delete(id);
+                return;
+            }
+
             game.gameMaster.socket.disconnect(true);
             context.clientUuidMap.delete(game.gameMaster.uuid);
             game.players.forEach(p => {
-                p.disconnect();
+                if (!p.dead) {
+                    p.disconnect();
+                }
                 context.clientUuidMap.delete(p.uuid);
             });
             context.gameIdToGameMap.delete(id);

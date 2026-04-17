@@ -12,21 +12,21 @@ import { CommonClientService } from '../../common/common-client.service';
     template: `
     <mat-card>
       <p>Teile diesen Link mit deinen Freunden, damit sie dem Spiel beitreten können:</p>
-      <mat-chip-list>
+      <mat-chip-set>
         <mat-chip color="warn" selected>
           {{joinGameUrl}}
         </mat-chip>
-      </mat-chip-list>
+      </mat-chip-set>
     
       @if (player.length) {
         <p class="mt-3">Folgende Spieler sind beigetreten:</p>
-        <mat-chip-list>
+        <mat-chip-set>
           @for (player of player; track player) {
             <mat-chip>
               {{ player }}
             </mat-chip>
           }
-        </mat-chip-list>
+        </mat-chip-set>
         <div class="d-flex justify-content-end">
           @if (player.length >= 2) {
             <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
@@ -48,7 +48,7 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   public joinGameUrl: string;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   private subscription: Subscription;
 
@@ -79,7 +79,7 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
   }
 
   startGame(): void {
-    this.done.next();
+    this.done.emit();
   }
 
   ngOnDestroy(): void {

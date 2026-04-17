@@ -57,7 +57,7 @@ export class CreateNewGameComponent implements OnInit {
   form: UntypedFormGroup;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   constructor(public spotifyService: SpotifyApiService,
               private clientService: CommonClientService,
@@ -78,7 +78,7 @@ export class CreateNewGameComponent implements OnInit {
   startGame() {
     this.spotifyService.getPlaylistData(this.form.get('spotifyPlaylist').value).subscribe(songs => {
       this.gameMasterService.createGame(songs);
-      this.done.next();
+      this.done.emit();
     }, (err: HttpErrorResponse) => {
       CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
       CreateNewGameComponent.LOGGER.error(err.message);

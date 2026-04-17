@@ -58,7 +58,7 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
   playerName: string;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   constructor(private socketService: SocketService,
               private fb: UntypedFormBuilder,
@@ -85,7 +85,7 @@ export class PlayerJoinGameComponent implements OnInit, OnDestroy {
 
     // wait until game round started
     this.socketService.getNextRoundStarted().pipe(take(1)).subscribe(
-      () => this.done.next()
+      () => this.done.emit()
     );
   }
 
