@@ -29,5 +29,8 @@
   "include": [
     "./src/**/*.ts",
     "../common-ts/**/*.ts"
+  ],
+  "exclude": [
+    "./src/**/*.spec.ts"
   ]
 }

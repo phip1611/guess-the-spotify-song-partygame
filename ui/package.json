@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --open",
+    "start": "CI=1 NG_CLI_ANALYTICS=false ng serve --open --proxy-config proxy.conf.json",
     "build": "ng build --configuration production",
     "test": "ng test",
     "typecheck": "tsc -p tsconfig.app.json --noEmit"
