@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Socket } from 'socket.io';
-import { Log } from './log';
-import { GameId } from './game';
+import { Log } from './log.js';
+import { GameId } from './game.js';
 
 export type ClientUuid = string;
 

@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io';
-import { AppServer } from './app-server';
-import { Game, GameId } from './game';
-import { GmCreateGamePayload, GmReconnectPayload, PlayerBuzzerPayload, PlayerHelloPayload, PlayerReconnectPayload, PlayerRegisterPayload, SocketEventType } from '../../common-ts/socket-events';
-import { Log } from './log';
-import { Client, CachedClientState, ClientType, ClientUuid } from './client';
+import { AppServer } from './app-server.js';
+import { Game, GameId } from './game.js';
+import { GmCreateGamePayload, GmReconnectPayload, PlayerBuzzerPayload, PlayerHelloPayload, PlayerReconnectPayload, PlayerRegisterPayload, SocketEventType } from '../../common-ts/socket-events.js';
+import { Log } from './log.js';
+import { Client, CachedClientState, ClientType, ClientUuid } from './client.js';
 
 /**
  * The game service only manages the communication between

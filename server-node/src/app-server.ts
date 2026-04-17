@@ -1,16 +1,16 @@
-import { dirname, join } from 'path';
-import express = require('express');
-import { Express, Request, Response } from 'express';
-import * as http from 'http';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import express, { Express, Request, Response } from 'express';
+import * as http from 'node:http';
 import { Server } from 'socket.io';
-import { GameService } from './game.service';
+import { GameService } from './game.service.js';
 
 /**
  * Initializes express and socket.io. Serves /public files. Angular lies there when the application is build.
  */
 export class AppServer {
 
-    public static readonly ROOT_DIR = dirname(require.main?.filename ?? __filename);
+    public static readonly ROOT_DIR = dirname(fileURLToPath(import.meta.url));
 
     public static readonly ANGULAR_DIR = join(AppServer.ROOT_DIR, 'public');
 

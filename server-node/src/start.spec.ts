@@ -1,9 +1,9 @@
 import { io, Socket } from 'socket.io-client';
-import { SocketEventType } from '../../common-ts/socket-events';
-import { AppServer } from './app-server';
-import { GameService } from './game.service';
-import { Game, GameId } from './game';
-import { ClientUuid } from './client';
+import { SocketEventType } from '../../common-ts/socket-events.js';
+import { AppServer } from './app-server.js';
+import { GameService } from './game.service.js';
+import { Game, GameId } from './game.js';
+import { ClientUuid } from './client.js';
 
 const TEST_PORT = 63246;
 

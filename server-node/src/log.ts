@@ -1,5 +1,5 @@
-import { SocketEventType } from '../../common-ts/socket-events';
-import { Client, ClientType } from './client';
+import { SocketEventType } from '../../common-ts/socket-events.js';
+import { Client, ClientType } from './client.js';
 
 export class Log {
 
