@@ -1,6 +1,8 @@
-ui
-build.sh
-README.md
-.gitignore
-server-node/
-!server-node/build
+.git
+.idea
+.codex
+ui/node_modules
+ui/dist
+server-node/node_modules
+server-node/build
+*.log
