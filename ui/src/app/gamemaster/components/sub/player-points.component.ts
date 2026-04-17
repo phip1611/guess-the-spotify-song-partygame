@@ -12,11 +12,11 @@ import { GameMasterService, PointsPerPlayerType } from '../../game-master.servic
           <!-- controls rechts -->
           <div class="d-flex w-100 justify-content-between">
             <div>
-              <mat-chip class="mr-3">{{player.points}}</mat-chip>
-              <span class="d-inline-block mr-3">{{player.playerName}}</span>
+              <mat-chip class="me-3">{{player.points}}</mat-chip>
+              <span class="d-inline-block me-3">{{player.playerName}}</span>
             </div>
             <div>
-              <mat-chip class="mr-1" (click)="addPoint(i)">
+              <mat-chip class="me-1" (click)="addPoint(i)">
                 <mat-icon>add</mat-icon>
               </mat-chip>
               <mat-chip (click)="removePoint(i)">
