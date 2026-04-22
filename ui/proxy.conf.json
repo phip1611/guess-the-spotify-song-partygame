@@ -1,0 +1,13 @@
+{
+  "/socket.io": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": false
+  },
+  "/info": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "changeOrigin": false
+  }
+}

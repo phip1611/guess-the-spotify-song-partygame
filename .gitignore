@@ -150,3 +150,8 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/linux,macos,angular,windows,intellij+all,visualstudiocode
 
 target/
+node_modules/
+ui/node_modules/
+server-node/node_modules/
+ui/dist/
+server-node/build/

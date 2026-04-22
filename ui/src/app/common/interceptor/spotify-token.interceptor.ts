@@ -1,7 +1,7 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SpotifyApiService } from '../spotify-api.service';
-import { Log } from 'ng-log';
+import { Log } from '../logging/logger';
 import { Injectable } from '@angular/core';
 
 @Injectable()

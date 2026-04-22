@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from '../../common/logging/logger';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
@@ -8,42 +8,47 @@ import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
-  selector: 'app-gm-show-link',
-  template: `
+    selector: 'app-gm-show-link',
+    template: `
     <mat-card>
       <p>Teile diesen Link mit deinen Freunden, damit sie dem Spiel beitreten können:</p>
-      <mat-chip-list>
+      <mat-chip-set>
         <mat-chip color="warn" selected>
           {{joinGameUrl}}
         </mat-chip>
-      </mat-chip-list>
-
-      <ng-container *ngIf="player.length">
+      </mat-chip-set>
+    
+      @if (players().length) {
         <p class="mt-3">Folgende Spieler sind beigetreten:</p>
-        <mat-chip-list>
-          <mat-chip *ngFor="let player of player">
-            {{ player }}
-          </mat-chip>
-        </mat-chip-list>
+        <mat-chip-set>
+          @for (player of players(); track player) {
+            <mat-chip>
+              {{ player }}
+            </mat-chip>
+          }
+        </mat-chip-set>
         <div class="d-flex justify-content-end">
-          <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
-                  *ngIf="player.length >= 2">Spiel starten
-          </button>
+          @if (players().length >= 2) {
+            <button class="mt-3" mat-raised-button color="primary" (click)="startGame()"
+              >Spiel starten
+            </button>
+          }
         </div>
-      </ng-container>
+      }
     </mat-card>
-  `
+    `,
+    standalone: false
 })
 export class ShowLinkComponent implements OnInit, OnDestroy {
 
   private static readonly LOGGER = new Log(ShowLinkComponent.name);
 
-  public player: string[] = [];
+  readonly players = this.gameMasterService.players;
 
   public joinGameUrl: string;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   private subscription: Subscription;
 
@@ -69,12 +74,11 @@ export class ShowLinkComponent implements OnInit, OnDestroy {
     this.subscription = this.socketService.getPlayerRegistered().subscribe(playerId => {
       ShowLinkComponent.LOGGER.debug('Got signal from socket service that a players want to register');
       this.gameMasterService.addPlayer(playerId);
-      this.player = this.gameMasterService.getPlayers();
     });
   }
 
   startGame(): void {
-    this.done.next();
+    this.done.emit();
   }
 
   ngOnDestroy(): void {

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
+import { Injectable, signal } from '@angular/core';
+import { Log } from '../common/logging/logger';
 import { PlayerModule } from './player.module';
 
 @Injectable()
@@ -7,13 +7,15 @@ export class PlayerService {
 
   private static readonly LOGGER = new Log(PlayerService.name);
 
-  private playerName: string;
+  private readonly playerNameState = signal('');
+
+  readonly playerName = this.playerNameState.asReadonly();
 
   getPlayerName(): string {
-    return this.playerName;
+    return this.playerNameState();
   }
 
   setPlayerName(playerName: string): void {
-    this.playerName = playerName;
+    this.playerNameState.set(playerName);
   }
 }

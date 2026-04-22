@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { BrowserModule } from '@angular/platform-browser';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
@@ -27,7 +26,6 @@ const MAT_MODULES = [
 ];
 
 const IMP_EXPORT_MODULES = [
-  BrowserModule,
   CommonModule,
   HttpClientModule,
   ReactiveFormsModule,

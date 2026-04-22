@@ -1,0 +1,21 @@
+{
+  "name": "guess-the-spotify-song-partygame",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.5.1",
+  "engines": {
+    "node": "24.14.0"
+  },
+  "scripts": {
+    "dev": "node ./scripts/dev.mjs",
+    "dev:ui": "npm --prefix ui start",
+    "dev:server": "npm --prefix server-node run start",
+    "test": "npm run test:server && npm run test:ui",
+    "test:ui": "npm --prefix ui test -- --watch=false --browsers=ChromeHeadless --progress=false",
+    "test:server": "npm --prefix server-node test -- --runInBand --forceExit",
+    "typecheck:ui": "npm --prefix ui run typecheck",
+    "build:ui": "npm --prefix ui run build",
+    "build:server": "npm --prefix server-node run build",
+    "docker:build": "docker build -t song-game ."
+  }
+}

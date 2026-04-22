@@ -1,63 +1,68 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from '../../common/logging/logger';
 import { SpotifyApiService } from '../../common/spotify-api.service';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { GameMasterService } from '../game-master.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonClientService } from '../../common/common-client.service';
 
 @Component({
-  selector: 'app-gm-create-new-game',
-  template: `
-    <ng-container *ngIf="!spotifyService.isConnected()">
+    selector: 'app-gm-create-new-game',
+    template: `
+    @if (!spotifyService.isConnected()) {
       <mat-card>
         <div class="d-flex justify-content-center">
           <button mat-raised-button color="primary" (click)="onConnect()"
-          >
+            >
             <mat-icon>music_note</mat-icon>
             Bei Spotify einloggen
           </button>
         </div>
       </mat-card>
-    </ng-container>
-
-    <mat-card *ngIf="spotifyService.isConnected()">
-      <div class="row">
-        <div class="col-2 col-lg-1 mt-3 text-center">
-          <mat-icon>link</mat-icon>
+    }
+    
+    @if (spotifyService.isConnected()) {
+      <mat-card>
+        <div class="row">
+          <div class="col-2 col-lg-1 mt-3 text-center">
+            <mat-icon>link</mat-icon>
+          </div>
+          <div class="col-10 col-lg-11">
+            @if (form) {
+              <form [formGroup]="form">
+                <mat-form-field class="w-100">
+                  <input matInput placeholder="Spotify-Playlist" formControlName="spotifyPlaylist">
+                  <mat-hint align="start">ID, Spotify-Link (spotify:playlist:) oder HTTPS</mat-hint>
+                </mat-form-field>
+              </form>
+            }
+          </div>
+          <div class="col-12 mt-3">
+            <button [disabled]="!form.valid"
+              class="w-100" mat-raised-button color="primary" (click)="startGame()">
+              Neues Spiel starten
+            </button>
+          </div>
         </div>
-        <div class="col-10 col-lg-11">
-          <form *ngIf="form" [formGroup]="form">
-            <mat-form-field class="w-100">
-              <input matInput placeholder="Spotify-Playlist" formControlName="spotifyPlaylist">
-              <mat-hint align="start">ID, Spotify-Link (spotify:playlist:) oder HTTPS</mat-hint>
-            </mat-form-field>
-          </form>
-        </div>
-        <div class="col-12 mt-3">
-          <button [disabled]="!form.valid"
-                  class="w-100" mat-raised-button color="primary" (click)="startGame()">
-            Neues Spiel starten
-          </button>
-        </div>
-      </div>
-    </mat-card>
-
-  `
+      </mat-card>
+    }
+    
+    `,
+    standalone: false
 })
 export class CreateNewGameComponent implements OnInit {
 
   private static readonly LOGGER = new Log(CreateNewGameComponent.name);
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   @Output()
-  done = new EventEmitter();
+  done = new EventEmitter<void>();
 
   constructor(public spotifyService: SpotifyApiService,
               private clientService: CommonClientService,
               private gameMasterService: GameMasterService,
-              private fb: FormBuilder) {
+              private fb: UntypedFormBuilder) {
   }
 
   ngOnInit(): void {
@@ -73,7 +78,7 @@ export class CreateNewGameComponent implements OnInit {
   startGame() {
     this.spotifyService.getPlaylistData(this.form.get('spotifyPlaylist').value).subscribe(songs => {
       this.gameMasterService.createGame(songs);
-      this.done.next();
+      this.done.emit();
     }, (err: HttpErrorResponse) => {
       CreateNewGameComponent.LOGGER.error('Failure during fetching data from spotify! Error is');
       CreateNewGameComponent.LOGGER.error(err.message);

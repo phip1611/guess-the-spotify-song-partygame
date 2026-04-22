@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "es2018",
-    "module": "commonjs",
+    "strict": false,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": false,
+    "target": "ES2022",
+    "module": "ES2022",
+    "ignoreDeprecations": "6.0",
+    "rootDir": "..",
     "baseUrl": "./",
     "outDir": "build",
+    "isolatedModules": true,
     "removeComments": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "importHelpers": false,
     "types": [
       "node",
-      "socket.io",
-      "socket.io-client",
       "express",
       "jest"
     ],
@@ -24,5 +29,8 @@
   "include": [
     "./src/**/*.ts",
     "../common-ts/**/*.ts"
+  ],
+  "exclude": [
+    "./src/**/*.spec.ts"
   ]
 }

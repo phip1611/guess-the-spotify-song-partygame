@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Log } from 'ng-log';
+import { Injectable, signal } from '@angular/core';
+import { Log } from '../common/logging/logger';
 import { CommonClientService } from '../common/common-client.service';
 import { SpotifyPlaylistTrack } from '../common/spotify-playlist-track';
 
@@ -10,17 +10,20 @@ export class GameMasterService {
 
   private static readonly LOGGER = new Log(GameMasterService.name);
 
-  private songsAvailable: SpotifyPlaylistTrack[] = [];
+  private readonly songsAvailableState = signal<SpotifyPlaylistTrack[]>([]);
 
-  private songsPlayed: SpotifyPlaylistTrack[] = [];
+  private readonly songsPlayedState = signal<SpotifyPlaylistTrack[]>([]);
 
-  private players: string[] = [];
+  private readonly playersState = signal<string[]>([]);
 
-  private pointsPerPlayer: PointsPerPlayerType = [];
+  private readonly pointsPerPlayerState = signal<PointsPerPlayerType>([]);
 
-  private round: number;
+  private readonly roundState = signal(0);
 
-  private totalRounds: number;
+  private readonly totalRoundsState = signal(0);
+
+  readonly players = this.playersState.asReadonly();
+  readonly pointsPerPlayer = this.pointsPerPlayerState.asReadonly();
 
   constructor(private clientService: CommonClientService) {
   }
@@ -31,9 +34,12 @@ export class GameMasterService {
    */
   createGame(songs: SpotifyPlaylistTrack[]) {
     this.clientService.gameId = GameMasterService.generateGameId();
-    this.songsAvailable = songs;
-    this.round = 0;
-    this.totalRounds = songs.length;
+    this.songsAvailableState.set([...songs]);
+    this.songsPlayedState.set([]);
+    this.playersState.set([]);
+    this.pointsPerPlayerState.set([]);
+    this.roundState.set(0);
+    this.totalRoundsState.set(songs.length);
   }
 
   /*destroyGame(songs: any[], rounds: number) {
@@ -45,28 +51,28 @@ export class GameMasterService {
   }*/
 
   addPlayer(playerName: string): void {
-    if (!this.players.includes(playerName)) {
+    if (!this.playersState().includes(playerName)) {
       GameMasterService.LOGGER.debug(`Player ${playerName} joined the game`);
-      this.players.push(playerName);
-      this.pointsPerPlayer.push({
+      this.playersState.update((players) => [...players, playerName]);
+      this.pointsPerPlayerState.update((pointsPerPlayer) => [...pointsPerPlayer, {
         playerName: playerName,
         points: 0
-      });
+      }]);
     } else {
       GameMasterService.LOGGER.error(`Player ${playerName} already registered!`);
     }
   }
 
   getPlayers(): string[] {
-    return this.players;
+    return this.playersState();
   }
 
   getSongsAvailable(): SpotifyPlaylistTrack[] {
-    return this.songsAvailable;
+    return this.songsAvailableState();
   }
 
   getSongsPlayed(): SpotifyPlaylistTrack[] {
-    return this.songsPlayed;
+    return this.songsPlayedState();
   }
 
   getGameId(): string {
@@ -74,51 +80,55 @@ export class GameMasterService {
   }
 
   getPointsPerPlayer(): PointsPerPlayerType {
-    return this.pointsPerPlayer;
+    return this.pointsPerPlayerState();
   }
 
   getRandomSongAndMarkAsPlayed(): SpotifyPlaylistTrack {
     const index = this.getRandomSongIndex();
-    const song = this.songsAvailable[index];
-    this.songsAvailable.splice(index, 1);
-    this.songsPlayed.push(song);
-    // console.dir('next song is: ');
-    // console.dir(song);
+    const songsAvailable = this.songsAvailableState();
+    const song = songsAvailable[index];
+    this.songsAvailableState.set(songsAvailable.filter((_, songIndex) => songIndex !== index));
+    this.songsPlayedState.update((songsPlayed) => [...songsPlayed, song]);
     return song;
   }
 
   markSongAsPlayed(songId: string): void {
-    this.songsPlayed.push(
-      this.songsAvailable.filter(x => x.id === songId)[0]
-    );
+    const song = this.songsAvailableState().find((x) => x.id === songId);
+    if (song) {
+      this.songsPlayedState.update((songsPlayed) => [...songsPlayed, song]);
+    }
   }
 
   addPoint(index: number): void {
-    this.pointsPerPlayer[index].points++;
+    this.pointsPerPlayerState.update((pointsPerPlayer) => pointsPerPlayer.map((entry, entryIndex) => (
+      entryIndex === index ? {...entry, points: entry.points + 1} : entry
+    )));
   }
 
   removePoint(index: number): void {
-    this.pointsPerPlayer[index].points--;
+    this.pointsPerPlayerState.update((pointsPerPlayer) => pointsPerPlayer.map((entry, entryIndex) => (
+      entryIndex === index ? {...entry, points: entry.points - 1} : entry
+    )));
   }
 
   nextRound(): void {
-    this.round++;
+    this.roundState.update((round) => round + 1);
   }
 
   getRound(): number {
-    return this.round;
+    return this.roundState();
   }
 
   getTotalRounds(): number {
-    return this.totalRounds;
+    return this.totalRoundsState();
   }
 
   hasMoreSongs(): boolean {
-    return this.songsAvailable.length > 0;
+    return this.songsAvailableState().length > 0;
   }
 
   private getRandomSongIndex(): number {
-    return Math.floor(Math.random() * this.songsAvailable.length);
+    return Math.floor(Math.random() * this.songsAvailableState().length);
   }
 
   public static generateGameId(): string {

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Socket } from 'socket.io';
-import { Log } from './log';
-import { GameId } from './game';
+import { Log } from './log.js';
+import { GameId } from './game.js';
 
 export type ClientUuid = string;
 
@@ -55,7 +55,7 @@ export class Client {
     // returns the client id of the connection from socket io
     // useful for debugging
     get socketIoClientId(): string {
-        return this._socket ? this._socket.client.id : null;
+        return this._socket ? this._socket.id : null;
     }
 
     /**

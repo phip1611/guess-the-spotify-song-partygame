@@ -1,85 +1,93 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { GameMasterService } from '../game-master.service';
 import { SocketService } from '../../common/socket.service';
 import { Subscription } from 'rxjs';
-import { Log } from 'ng-log';
+import { Log } from '../../common/logging/logger';
 import { SocketEventType } from '../../../../../common-ts/socket-events';
 import { SpotifyPlaylistTrack } from '../../common/spotify-playlist-track';
 
 export type PlayerBuzzerTimesType = { playerName: string, seconds: number }[];
 
 @Component({
-  selector: 'app-gm-in-game',
-  template: `
+    selector: 'app-gm-in-game',
+    template: `
     <div class="mb-3">
       <!-- if content is higher than display to have a margin at the bottom -->
-
+    
       <mat-card>
         <div class="row">
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="!playback?.playedOnce"
-                    mat-raised-button color="accent"
-                    (click)="showSolution = !showSolution; solutionShowedOnce = true">
+              [disabled]="!playback()?.playedOnce"
+              mat-raised-button color="accent"
+              (click)="toggleSolution()">
               Lösung
             </button>
           </div>
           <div class="col-6 col-md-4">
             <button class="w-100"
-                    [disabled]="playback?.isPlaying"
-                    mat-raised-button color="warn"
-                    (click)="onPlaySong()">
+              [disabled]="playback()?.isPlaying"
+              mat-raised-button color="warn"
+              (click)="onPlaySong()">
               Song abspielen
             </button>
           </div>
           <div class="col-12 col-md-4 mt-2 mt-md-0">
-            <button *ngIf="gameMasterService.hasMoreSongs()" class="w-100"
-                    [disabled]="!playback?.playedOnce || !solutionShowedOnce"
-                    mat-raised-button color="primary"
-                    (click)="onNextRound()">
-              Nächste Runde
-            </button>
-            <button *ngIf="!gameMasterService.hasMoreSongs()" class="w-100"
-                    [disabled]="true" mat-raised-button>
-              Spiel vorbei :)
-            </button>
+            @if (gameMasterService.hasMoreSongs()) {
+              <button class="w-100"
+                [disabled]="!playback()?.playedOnce || !solutionShowedOnce()"
+                mat-raised-button color="primary"
+                (click)="onNextRound()">
+                Nächste Runde
+              </button>
+            }
+            @if (!gameMasterService.hasMoreSongs()) {
+              <button class="w-100"
+                [disabled]="true" mat-raised-button>
+                Spiel vorbei :)
+              </button>
+            }
           </div>
         </div>
       </mat-card>
-
+    
       <!-- solution and player buzzer times on same row -->
       <div class="row mt-3">
-        <ng-container *ngIf="!showSolution && !buzzerTimeByPlayerName.length">
+        @if (!showSolution() && !buzzerTimeByPlayerName().length) {
           <div class="col-12 offset-0 col-lg-8 offset-lg-2">
             <app-player-points></app-player-points>
           </div>
-        </ng-container>
-
-        <ng-container
-          *ngIf="showSolution && !buzzerTimeByPlayerName.length || !showSolution && buzzerTimeByPlayerName.length">
+        }
+    
+        @if (showSolution() && !buzzerTimeByPlayerName().length || !showSolution() && buzzerTimeByPlayerName().length) {
           <div class="col-12 offset-0 col-lg-8 offset-lg-2">
-            <app-spotify-songcard *ngIf="showSolution" [playback]="playback"></app-spotify-songcard>
-            <app-player-buzzer-times *ngIf="buzzerTimeByPlayerName.length"
-                                     [times]="buzzerTimeByPlayerName"
-            ></app-player-buzzer-times>
+            @if (showSolution()) {
+              <app-spotify-songcard [playback]="playback()"></app-spotify-songcard>
+            }
+            @if (buzzerTimeByPlayerName().length) {
+              <app-player-buzzer-times
+                [times]="buzzerTimeByPlayerName()"
+              ></app-player-buzzer-times>
+            }
             <app-player-points class="mt-3"></app-player-points>
           </div>
-        </ng-container>
-
-        <ng-container *ngIf="showSolution && buzzerTimeByPlayerName.length">
+        }
+    
+        @if (showSolution() && buzzerTimeByPlayerName().length) {
           <div class="col-12 mb-3 col-lg-6 mb-lg-0">
             <app-spotify-songcard
-              [playback]="playback"
+              [playback]="playback()"
             ></app-spotify-songcard>
           </div>
           <div class="col-12 col-lg-6">
-            <app-player-buzzer-times [times]="buzzerTimeByPlayerName"></app-player-buzzer-times>
+            <app-player-buzzer-times [times]="buzzerTimeByPlayerName()"></app-player-buzzer-times>
             <app-player-points class="mt-3"></app-player-points>
           </div>
-        </ng-container>
+        }
       </div>
     </div>
-  `
+    `,
+    standalone: false
 })
 export class InGameComponent implements OnInit {
 
@@ -87,15 +95,15 @@ export class InGameComponent implements OnInit {
 
   isVeryFirstRound: boolean = true;
 
-  playback: Playback;
+  readonly playback = signal<Playback | null>(null);
 
-  showSolution: boolean;
+  readonly showSolution = signal(false);
 
-  solutionShowedOnce = false;
+  readonly solutionShowedOnce = signal(false);
 
-  playerBuzzerSubscription: Subscription;
+  playerBuzzerSubscription?: Subscription;
 
-  buzzerTimeByPlayerName: PlayerBuzzerTimesType = [];
+  readonly buzzerTimeByPlayerName = signal<PlayerBuzzerTimesType>([]);
 
   constructor(public gameMasterService: GameMasterService,
               private socketService: SocketService) {
@@ -107,29 +115,38 @@ export class InGameComponent implements OnInit {
   }
 
   onPlaySong(): void {
+    const playback = this.playback();
+    if (!playback) {
+      return;
+    }
+
     this.socketService.sendMessage({
       type: SocketEventType.GM_ENABLE_BUZZER,
       payload: null
     });
-    this.playback.play();
+    playback.play();
 
     this.playerBuzzerSubscription = this.socketService.getPlayerBuzzered().subscribe(playerId => {
-      const millis = new Date().getTime() - this.playback.firstPlayedTime.getTime();
+      const firstPlayedTime = playback.firstPlayedTime;
+      if (!firstPlayedTime) {
+        return;
+      }
+
+      const millis = new Date().getTime() - firstPlayedTime.getTime();
       const seconds = millis / 1000;
-      const tmpArr = this.buzzerTimeByPlayerName;
-      this.buzzerTimeByPlayerName = [];
-      if (tmpArr.map(p => p.playerName).includes(playerId)) {
+      const currentTimes = this.buzzerTimeByPlayerName();
+
+      if (currentTimes.map((p) => p.playerName).includes(playerId)) {
         InGameComponent.LOGGER.debug(`PLAYER_BUZZER by player '${playerId}' received multiple times; ignore`);
       } else {
         InGameComponent.LOGGER.debug(`PLAYER_BUZZER received by player '${playerId}'`);
-        tmpArr.push({
+        const nextTimes = [...currentTimes, {
           seconds: seconds, playerName: playerId
-        });
+        }];
         InGameComponent.LOGGER.debug(`buzzerTimeByPlayerName:`);
-        InGameComponent.LOGGER.debug(JSON.stringify(tmpArr));
+        InGameComponent.LOGGER.debug(JSON.stringify(nextTimes));
+        this.buzzerTimeByPlayerName.set(nextTimes);
       }
-      // do trigger angular change detection
-      this.buzzerTimeByPlayerName = tmpArr;
     });
   }
 
@@ -140,7 +157,7 @@ export class InGameComponent implements OnInit {
       `Starting Round ${this.gameMasterService.getRound()}/${this.gameMasterService.getTotalRounds()}`
     );
 
-    this.showSolution = false;
+    this.showSolution.set(false);
 
     // disable all buzzer buttons
     this.socketService.sendMessage({
@@ -149,18 +166,23 @@ export class InGameComponent implements OnInit {
     });
 
     if (!this.isVeryFirstRound) {
-      this.playback.stop(); // stop old playback if it's running
+      this.playback()?.stop();
       // reset everything
-      this.solutionShowedOnce = false;
-      this.playerBuzzerSubscription.unsubscribe();
-      this.buzzerTimeByPlayerName = [];
+      this.solutionShowedOnce.set(false);
+      this.playerBuzzerSubscription?.unsubscribe();
+      this.buzzerTimeByPlayerName.set([]);
     } else {
       this.isVeryFirstRound = false;
     }
 
     // prepare audio playback
     const nextSong = this.gameMasterService.getRandomSongAndMarkAsPlayed();
-    this.playback = new Playback(nextSong);
+    this.playback.set(new Playback(nextSong));
+  }
+
+  toggleSolution(): void {
+    this.showSolution.update((showSolution) => !showSolution);
+    this.solutionShowedOnce.set(true);
   }
 }
 
@@ -169,16 +191,22 @@ export class InGameComponent implements OnInit {
  */
 export class Playback {
 
+  private readonly playedOnceState = signal(false);
+
+  private readonly isPlayingState = signal(false);
+
+  private readonly firstPlayedTimeState = signal<Date | null>(null);
+
   get playedOnce(): boolean {
-    return this._playedOnce;
+    return this.playedOnceState();
   }
 
   get isPlaying(): boolean {
-    return this._isPlaying;
+    return this.isPlayingState();
   }
 
-  get firstPlayedTime(): Date {
-    return this._firstPlayedTime;
+  get firstPlayedTime(): Date | null {
+    return this.firstPlayedTimeState();
   }
 
   get spotifyTrack(): any {
@@ -191,12 +219,6 @@ export class Playback {
 
   private audio: HTMLAudioElement;
 
-  private _playedOnce: boolean = false;
-
-  private _isPlaying: boolean = false;
-
-  private _firstPlayedTime: Date;
-
   constructor(spotifyTrack: SpotifyPlaylistTrack) {
     this._spotifyTrack = spotifyTrack;
     this.audio = new Audio(spotifyTrack.preview_url);
@@ -204,20 +226,20 @@ export class Playback {
   }
 
   public play(): void {
-    if (this._isPlaying) {
+    if (this.isPlayingState()) {
       Playback.LOGGER.debug('music is already playing!');
       return;
     }
-    if (!this._firstPlayedTime) {
-      this._firstPlayedTime = new Date();
+    if (!this.firstPlayedTimeState()) {
+      this.firstPlayedTimeState.set(new Date());
     }
-    this._playedOnce = true;
-    this._isPlaying = true;
+    this.playedOnceState.set(true);
+    this.isPlayingState.set(true);
     this.audio.play();
   }
 
   public stop(): void {
-    this._isPlaying = false;
+    this.isPlayingState.set(false);
     this.audio.pause();
     this.audio.currentTime = 0; // reset for another playback
   }

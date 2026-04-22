@@ -7,12 +7,14 @@ import { PlayerModule } from './player/player.module';
 import { GameMasterModule } from './gamemaster/game-master.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SpotifyTokenInterceptor } from './common/interceptor/spotify-token.interceptor';
+import { BrowserModule } from '@angular/platform-browser';
 
 @NgModule({
   declarations: [
     AppComponent
   ],
   imports: [
+    BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
 

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Log } from 'ng-log';
+import { Log } from './common/logging/logger';
 
 @Component({
-  selector: 'app-root',
-  template: `
+    selector: 'app-root',
+    template: `
     <mat-toolbar color="primary" class="mb-3">
       <h1 class="text-center w-100">🎶 Songs erraten - Der Partyspaß 🥳</h1>
     </mat-toolbar>
@@ -16,7 +16,8 @@ import { Log } from 'ng-log';
         </div>
       </div>
     </div>
-  `
+  `,
+    standalone: false
 })
 export class AppComponent implements OnInit {
 

@@ -3,29 +3,29 @@
   "version": "1.0.0",
   "author": "phip1611",
   "license": "UNLICENSED",
+  "type": "module",
   "private": true,
   "scripts": {
-    "start": "nodemon --config \"./nodemon.config.json\"/",
-    "test": "jest --verbose false",
-    "test-w": "jest --verbose false --watch"
+    "build": "tsc -p tsconfig.json",
+    "start": "nodemon --config ./nodemon.config.json",
+    "start:prod": "node build/server-node/src/start.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false --runInBand",
+    "test-w": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --verbose false --watch --runInBand"
   },
   "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@types/jest": "^26.0.0",
-    "@types/node": "^12.12.47",
-    "@types/socket.io": "^2.1.8",
-    "@types/socket.io-client": "^1.4.33",
-    "@types/uuid": "^8.0.0",
-    "jest": "^26.0.1",
-    "nodemon": "^2.0.4",
-    "socket.io-client": "^2.3.0",
-    "ts-jest": "^26.1.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.12.2",
+    "jest": "^30.3.0",
+    "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.3",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0",
-    "uuid": "^8.1.0"
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3",
+    "uuid": "^11.1.0"
   }
 }

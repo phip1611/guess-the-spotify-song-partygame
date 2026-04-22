@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Log } from 'ng-log';
+import { Log } from './logging/logger';
 // tslint:disable-next-line:max-line-length
 import { GmEnableBuzzerPayload, GmStartNextRoundPayload, PlayerBuzzerPayload, PlayerRegisterPayload, ServerConfirmPayload, SocketEvent, SocketEventType } from '../../../../common-ts/socket-events';
 import { AppSocket } from './app-socket.service';

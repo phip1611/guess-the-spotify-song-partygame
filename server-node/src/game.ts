@@ -1,5 +1,5 @@
-import { Client, ClientType } from './client';
-import { Log } from './log';
+import { Client, ClientType } from './client.js';
+import { Log } from './log.js';
 
 export type GameId = string;
 

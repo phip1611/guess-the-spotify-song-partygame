@@ -1,5 +1,5 @@
 {
   "watch": ["src", "../common-ts"],
   "ext": "ts",
-  "exec": "ts-node src/start.ts"
+  "exec": "node --loader ts-node/esm src/start.ts"
 }
